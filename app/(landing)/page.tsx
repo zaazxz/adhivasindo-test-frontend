@@ -64,7 +64,7 @@ export default function LandingPage() {
         products={products}
         categories={categories}
         selectedCategoryId={selectedCategoryId}
-        onCategoryChange={setSelectedCategoryId}
+        onCategoryChange={handleCategorySelect}
         searchQuery={searchQ}
       />
     </>

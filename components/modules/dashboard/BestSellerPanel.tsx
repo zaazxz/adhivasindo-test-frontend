@@ -52,10 +52,10 @@ export default function BestSellerPanel() {
         }
       });
 
-      // Sort by most sold and take top 5
+      // Sort by most sold and take top 3
       const sorted = Object.values(productSales)
         .sort((a, b) => b.sold - a.sold)
-        .slice(0, 5)
+        .slice(0, 3)
         .map((item, i) => ({
           ...item,
           color: COLORS[i % COLORS.length],

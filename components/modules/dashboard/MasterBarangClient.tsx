@@ -28,6 +28,8 @@ export default function MasterBarangClient() {
     setDescription,
     productTypeId,
     setProductTypeId,
+    status,
+    setStatus,
     imagePreview,
     fileInputRef,
     handleOpenModal,
@@ -123,16 +125,27 @@ export default function MasterBarangClient() {
                 <th className="py-3 px-4 cursor-pointer hover:text-gray-700" onClick={() => handleSort("stock")}>
                   <div className="flex items-center gap-1">Stok {sortConfig?.key === "stock" && (sortConfig.direction === "asc" ? <FiArrowUp /> : <FiArrowDown />)}</div>
                 </th>
+                <th className="py-3 px-4 cursor-pointer hover:text-gray-700" onClick={() => handleSort("status")}>
+                  <div className="flex items-center gap-1">Status {sortConfig?.key === "status" && (sortConfig.direction === "asc" ? <FiArrowUp /> : <FiArrowDown />)}</div>
+                </th>
                 <th className="py-3 px-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="text-[13px] text-gray-700">
-              {currentData.length > 0 ? currentData.map((item) => (
+              {currentData.length > 0 ? currentData.map((item) => {
+                const rawImg = item.image_url || item.image;
+                const imgUrl = rawImg 
+                  ? rawImg.startsWith('http') 
+                    ? rawImg 
+                    : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${rawImg}`
+                  : null;
+
+                return (
                 <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-3 px-4 font-semibold flex items-center gap-3">
                     <div className="w-8 h-8 rounded-md bg-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
-                      {(item.image_url || item.image) && (item.image_url || item.image) !== 'null' ? (
-                        <img src={(item.image_url || item.image)!} alt={item.name} className="w-full h-full object-cover" />
+                      {imgUrl && imgUrl !== 'null' ? (
+                        <img src={imgUrl} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
                         <FiImage className="text-gray-400" />
                       )}
@@ -150,6 +163,16 @@ export default function MasterBarangClient() {
                       {item.stock ?? 0} Tersedia
                     </span>
                   </td>
+                  <td className="py-3 px-4">
+                    <span className={`py-1 px-2 rounded-md text-[10px] font-bold ${
+                      item.status === 'active' ? 'bg-blue-100 text-blue-700' :
+                      item.status === 'inactive' ? 'bg-gray-100 text-gray-700' :
+                      item.status === 'out-of-stock' ? 'bg-red-100 text-red-700' :
+                      'bg-amber-100 text-amber-700'
+                    }`}>
+                      {item.status ? item.status.toUpperCase() : "ACTIVE"}
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-right">
                     <button onClick={() => handleOpenModal(item)} className="text-[#3b63f6] hover:bg-blue-50 p-1.5 rounded-md transition-colors mr-1">
                       <FiEdit2 size={14} />
@@ -159,7 +182,7 @@ export default function MasterBarangClient() {
                     </button>
                   </td>
                 </tr>
-              )) : (
+              )}) : (
                 <tr>
                   <td colSpan={5} className="py-10 text-center text-gray-400 text-sm">Data tidak ditemukan.</td>
                 </tr>
@@ -274,7 +297,7 @@ export default function MasterBarangClient() {
                   />
                 </div>
 
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <label className="block text-[12px] font-bold text-gray-700 mb-2">Kategori</label>
                   <select
                     value={productTypeId}
@@ -286,6 +309,21 @@ export default function MasterBarangClient() {
                     {productTypes.map((t) => (
                       <option key={t.id} value={t.id}>{(t as any).type_name || t.name}</option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="col-span-1">
+                  <label className="block text-[12px] font-bold text-gray-700 mb-2">Status</label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    required
+                    className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-[13px] font-medium outline-none focus:border-[#3b63f6] focus:ring-4 focus:ring-blue-50 focus:bg-white transition-all cursor-pointer"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    {status === 'out-of-stock' && <option value="out-of-stock" className="hidden">Out of Stock</option>}
+                    {status === 'draft' && <option value="draft" className="hidden">Draft</option>}
                   </select>
                 </div>
 

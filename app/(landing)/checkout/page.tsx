@@ -4,7 +4,7 @@ import { useCheckout } from "@/hooks/useCheckout";
 import { FORMAT_RUPIAH } from "@/constants";
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice, isSubmitting, handlePay } = useCheckout();
+  const { items, getTotalPrice, isSubmitting, customerName, setCustomerName, address, setAddress, handlePay } = useCheckout();
 
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -12,23 +12,29 @@ export default function CheckoutPage() {
       
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex-1">
-          {/* Shipping Form is hidden / auto-filled for now since API might not need it, or we just keep the form for visual completeness */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Shipping Information</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Informasi Pemesan</h2>
             <form id="checkout-form" onSubmit={handlePay} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">First Name</label>
-                  <input required type="text" className="w-full bg-[#f8f9fa] border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#f59e0b]" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Last Name</label>
-                  <input required type="text" className="w-full bg-[#f8f9fa] border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#f59e0b]" />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Nama Pemesan <span className="text-red-500">*</span></label>
+                <input
+                  required
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Masukkan nama lengkap"
+                  className="w-full bg-[#f8f9fa] border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#f59e0b] transition-colors"
+                />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Address</label>
-                <textarea required rows={3} className="w-full bg-[#f8f9fa] border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#f59e0b]"></textarea>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Alamat</label>
+                <textarea
+                  rows={3}
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Masukkan alamat pengiriman (opsional)"
+                  className="w-full bg-[#f8f9fa] border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#f59e0b] transition-colors"
+                ></textarea>
               </div>
             </form>
           </div>

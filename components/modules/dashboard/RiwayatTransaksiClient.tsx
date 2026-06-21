@@ -27,10 +27,15 @@ interface Order {
   total?: number;
   status: string;
   payment_method?: string;
+  customer_name?: string;
+  name?: string;
   created_at: string;
   user?: {
     name: string;
     email?: string;
+  };
+  customer?: {
+    name: string;
   };
   items?: OrderItem[];
   order_details?: OrderItem[];

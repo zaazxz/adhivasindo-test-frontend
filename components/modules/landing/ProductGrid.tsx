@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon, X, ShoppingCart, Package, ChevronRight } from "lucide-react";
+import { ImageIcon, X, ShoppingCart, Package, ChevronRight, AlertTriangle, Sparkles } from "lucide-react";
 import ImageWithSkeleton from "@/components/ui/ImageWithSkeleton";
 
 import { Category, Product, ProductGridProps } from "@/types";
@@ -61,6 +61,10 @@ export default function ProductGrid({ products, categories = [], selectedCategor
           {filtered.map((prod) => {
             const isAdded = addedIds.has(String(prod.id));
             const outOfStock = (prod.stock ?? 0) <= 0;
+            const isLowStock = (prod.stock ?? 0) > 0 && (prod.stock ?? 0) <= 5;
+            const isNew = prod.created_at ? (Date.now() - new Date(prod.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000 : false;
+            const isNotActive = prod.status !== "active";
+            const isDisabled = isAdded || outOfStock || isNotActive;
 
             return (
               <div key={prod.id} className="flex flex-col group">
@@ -88,8 +92,24 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                       </div>
                     </div>
                   )}
-                  {outOfStock && !isAdded && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full">
+                  {/* Product Badges */}
+                  {!isAdded && (isNew || isLowStock) && (
+                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                      {isNew && (
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[8px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm w-fit">
+                          <Sparkles className="w-2.5 h-2.5" /> New
+                        </div>
+                      )}
+                      {isLowStock && (
+                        <div className="bg-gradient-to-r from-red-500 to-rose-400 text-white text-[8px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm w-fit">
+                          <AlertTriangle className="w-2.5 h-2.5" /> Sisa Sedikit
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {/* Out of Stock Badge */}
+                  {!isAdded && outOfStock && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                       Out of Stock
                     </div>
                   )}
@@ -98,33 +118,43 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                 <p className="text-[15px] font-extrabold text-gray-900 mb-3">
                   {FORMAT_RUPIAH(Number(prod.price))}
                 </p>
-                <div className="flex items-center justify-between mt-auto pt-1">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3 text-xs font-semibold text-gray-400">
                     <button
-                      onClick={() => setQty(prod.id, getQty(prod.id) - 1)}
-                      className="hover:text-black active:scale-90 transition-all w-5 h-5 flex items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 cursor-pointer"
+                      onClick={() => setQty(prod.id, Number(getQty(prod.id)) - 1, prod.stock ?? 99)}
+                      disabled={Number(getQty(prod.id)) <= 1 || isNotActive}
+                      className="hover:text-black active:scale-90 transition-all w-5 h-5 flex items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-gray-400"
                     >
                       -
                     </button>
-                    <span className="text-black w-4 text-center">{getQty(prod.id)}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={getQty(prod.id)}
+                      onChange={(e) => setQty(prod.id, e.target.value, prod.stock ?? 99)}
+                      onBlur={() => { if (getQty(prod.id) === "" || Number(getQty(prod.id)) < 1) setQty(prod.id, 1, prod.stock ?? 99); }}
+                      disabled={isNotActive}
+                      className="text-black w-8 text-center bg-transparent outline-none border-b border-transparent focus:border-gray-300 transition-colors disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
                     <button
-                      onClick={() => setQty(prod.id, getQty(prod.id) + 1)}
-                      className="hover:text-black active:scale-90 transition-all w-5 h-5 flex items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 cursor-pointer"
+                      onClick={() => setQty(prod.id, Number(getQty(prod.id)) + 1, prod.stock ?? 99)}
+                      disabled={Number(getQty(prod.id)) >= (prod.stock ?? 99) || isNotActive}
+                      className="hover:text-black active:scale-90 transition-all w-5 h-5 flex items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-gray-400"
                     >
                       +
                     </button>
                   </div>
                   <button
                     onClick={() => handleAddToCart(prod)}
-                    disabled={isAdded || outOfStock}
-                    className={`text-[11px] font-bold transition-all cursor-pointer ${isAdded
+                    disabled={isDisabled}
+                    className={`text-[11px] font-bold transition-all ${isAdded
                         ? "text-green-500"
-                        : outOfStock
+                        : isDisabled
                           ? "text-gray-300 cursor-not-allowed"
-                          : "text-gray-400 hover:text-[#f59e0b] active:scale-95"
+                          : "text-gray-400 hover:text-[#f59e0b] cursor-pointer active:scale-95"
                       }`}
                   >
-                    {isAdded ? "Added ✓" : outOfStock ? "Unavailable" : "Add to Cart"}
+                    {isAdded ? "Added ✓" : isNotActive ? "Unavailable" : outOfStock ? "Out of Stock" : "Add to Cart"}
                   </button>
                 </div>
               </div>
@@ -217,33 +247,53 @@ export default function ProductGrid({ products, categories = [], selectedCategor
 
                   {/* Add to Cart */}
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="flex items-center gap-3 border border-gray-200 rounded-lg px-3 py-2">
-                      <button
-                        onClick={() => setQty(selectedProduct.id, getQty(selectedProduct.id) - 1)}
-                        className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black hover:border-gray-400 transition-colors cursor-pointer"
-                      >
-                        -
-                      </button>
-                      <span className="text-sm font-bold text-gray-800 w-6 text-center">
-                        {getQty(selectedProduct.id)}
-                      </span>
-                      <button
-                        onClick={() => setQty(selectedProduct.id, getQty(selectedProduct.id) + 1)}
-                        className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black hover:border-gray-400 transition-colors cursor-pointer"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => {
-                        handleAddToCart(selectedProduct);
-                      }}
-                      disabled={(selectedProduct.stock ?? 0) <= 0}
-                      className="flex-1 bg-[#f59e0b] hover:bg-amber-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg text-sm transition-all shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      {(selectedProduct.stock ?? 0) <= 0 ? "Out of Stock" : "Add to Cart"}
-                    </button>
+                    {(() => {
+                      const outOfStock = (selectedProduct.stock ?? 0) <= 0;
+                      const isNotActive = selectedProduct.status !== "active";
+                      const isDisabled = addedIds.has(String(selectedProduct.id)) || outOfStock || isNotActive;
+
+                      return (
+                        <>
+                          <div className="flex items-center gap-4 text-sm font-semibold text-gray-500 bg-gray-50 px-4 py-2 rounded-xl">
+                            <button
+                              onClick={() => setQty(selectedProduct.id, Number(getQty(selectedProduct.id)) - 1, selectedProduct.stock ?? 99)}
+                              disabled={Number(getQty(selectedProduct.id)) <= 1 || isNotActive}
+                              className="hover:text-black transition-colors w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={getQty(selectedProduct.id)}
+                              onChange={(e) => setQty(selectedProduct.id, e.target.value, selectedProduct.stock ?? 99)}
+                              onBlur={() => { if (getQty(selectedProduct.id) === "" || Number(getQty(selectedProduct.id)) < 1) setQty(selectedProduct.id, 1, selectedProduct.stock ?? 99); }}
+                              disabled={isNotActive}
+                              className="text-black w-10 text-center text-lg font-bold bg-transparent outline-none disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <button
+                              onClick={() => setQty(selectedProduct.id, Number(getQty(selectedProduct.id)) + 1, selectedProduct.stock ?? 99)}
+                              disabled={Number(getQty(selectedProduct.id)) >= (selectedProduct.stock ?? 99) || isNotActive}
+                              className="hover:text-black transition-colors w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => handleAddToCart(selectedProduct)}
+                            disabled={isDisabled}
+                            className={`flex-1 font-bold py-3.5 px-6 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 ${addedIds.has(String(selectedProduct.id))
+                                ? "bg-green-500 hover:bg-green-600 text-white cursor-pointer"
+                                : isDisabled
+                                  ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                                  : "bg-[#f59e0b] hover:bg-amber-600 text-white cursor-pointer"
+                              }`}
+                          >
+                            {addedIds.has(String(selectedProduct.id)) ? "Added to Cart ✓" : isNotActive ? "Unavailable" : outOfStock ? "Out of Stock" : "Add to Cart"}
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
 
                   {/* Product ID */}

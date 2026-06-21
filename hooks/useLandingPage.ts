@@ -35,6 +35,7 @@ export function useLandingPage() {
           status: p.status || "active",
           product_type_id: p.type_id,
           type_name: p.type?.type_name || "",
+          created_at: p.created_at || "",
         }));
         setProducts(mappedProducts);
       }

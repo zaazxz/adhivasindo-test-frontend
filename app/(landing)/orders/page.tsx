@@ -137,11 +137,17 @@ export default function OrderHistoryPage() {
                     
                     <div className="flex flex-wrap gap-3">
                       {items.map((item: any, idx: number) => {
-                        const img = item.product?.image || item.image;
+                        const rawImg = item.product?.image || item.image;
+                        const hasImg = !!rawImg && rawImg.length > 0 && rawImg !== 'null';
+                        const imgUrl = hasImg
+                          ? rawImg.startsWith('http')
+                            ? rawImg
+                            : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${rawImg}`
+                          : "";
                         return (
                           <div key={idx} className="bg-gray-50 border border-gray-100 w-16 h-16 rounded-lg flex items-center justify-center p-1 group relative" title={item.product?.name || item.name}>
-                            {img && img.length > 0 && img !== 'null' ? (
-                              <img src={img} alt="product" className="w-full h-full object-contain mix-blend-multiply" />
+                            {hasImg ? (
+                              <img src={imgUrl} alt={item.product?.name || "product"} className="w-full h-full object-contain mix-blend-multiply" />
                             ) : (
                               <ImageIcon className="w-6 h-6 text-gray-300" />
                             )}

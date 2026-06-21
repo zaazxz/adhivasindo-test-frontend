@@ -25,6 +25,7 @@ export function useMasterBarang() {
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
   const [productTypeId, setProductTypeId] = useState("");
+  const [status, setStatus] = useState("active");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +60,14 @@ export function useMasterBarang() {
       setStock(product.stock?.toString() || "0");
       setDescription(product.desc || product.description || "");
       setProductTypeId(product.type_id ? product.type_id.toString() : (product.product_type_id ? product.product_type_id.toString() : ""));
-      setImagePreview(product.image || product.image_url || null);
+      setStatus(product.status || "active");
+      const rawImg = product.image || product.image_url;
+      const imgUrl = rawImg
+        ? rawImg.startsWith('http')
+          ? rawImg
+          : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${rawImg}`
+        : null;
+      setImagePreview(imgUrl);
       setImageFile(null);
     } else {
       setEditingId(null);
@@ -68,6 +76,7 @@ export function useMasterBarang() {
       setStock("");
       setDescription("");
       setProductTypeId("");
+      setStatus("active");
       setImagePreview(null);
       setImageFile(null);
     }
@@ -101,6 +110,7 @@ export function useMasterBarang() {
       formData.append("stock", stock);
       formData.append("desc", description);
       formData.append("type_id", productTypeId);
+      formData.append("status", status);
       if (imageFile) {
         formData.append("image", imageFile);
       }
@@ -165,6 +175,8 @@ export function useMasterBarang() {
     setDescription,
     productTypeId,
     setProductTypeId,
+    status,
+    setStatus,
     imagePreview,
     fileInputRef,
     handleOpenModal,

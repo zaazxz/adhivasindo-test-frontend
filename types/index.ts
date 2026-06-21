@@ -30,11 +30,11 @@ export interface Product {
   product_type?: ProductType;
   stock?: number;
   status?: string;
+  created_at?: string;
 }
 
 export interface CartItem extends Product {
   quantity: number;
-  desc?: string;
 }
 
 export interface StatCardData {

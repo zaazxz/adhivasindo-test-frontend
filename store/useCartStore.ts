@@ -48,11 +48,16 @@ export const useCartStore = create<CartState>((set, get) => ({
     const existingItem = state.items.find((item) => item.id === product.id);
     let newItems: CartItem[];
     if (existingItem) {
-      newItems = state.items.map((item) =>
-        item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
-      );
+      newItems = state.items.map((item) => {
+        if (item.id === product.id) {
+          const maxStock = item.stock ?? 99;
+          return { ...item, quantity: Math.min(maxStock, item.quantity + quantity) };
+        }
+        return item;
+      });
     } else {
-      newItems = [...state.items, { ...product, quantity }];
+      const maxStock = product.stock ?? 99;
+      newItems = [...state.items, { ...product, quantity: Math.min(maxStock, quantity) }];
     }
     saveCartToCookies(newItems); // Persist to cookies (for dummy only)
     return { items: newItems };
@@ -65,9 +70,13 @@ export const useCartStore = create<CartState>((set, get) => ({
   }),
   
   updateQuantity: (productId, quantity) => set((state) => {
-    const newItems = state.items.map((item) =>
-      item.id === productId ? { ...item, quantity: Math.max(1, quantity) } : item
-    );
+    const newItems = state.items.map((item) => {
+      if (item.id === productId) {
+        const maxStock = item.stock ?? 99;
+        return { ...item, quantity: Math.max(1, Math.min(maxStock, quantity)) };
+      }
+      return item;
+    });
     saveCartToCookies(newItems);
     return { items: newItems };
   }),

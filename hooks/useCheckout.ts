@@ -8,6 +8,8 @@ export function useCheckout() {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [address, setAddress] = useState("");
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,10 +18,23 @@ export function useCheckout() {
       return;
     }
 
+    if (!customerName.trim()) {
+      toast.error("Nama pemesan wajib diisi!");
+      return;
+    }
+
+    const outOfStockItems = items.filter(item => item.stock !== undefined && item.quantity > item.stock);
+    if (outOfStockItems.length > 0) {
+      toast.error(`Quantity exceeds available stock for ${outOfStockItems.map(i => i.name).join(", ")}`);
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const payload = {
         payment_method: "cash",
+        customer_name: customerName.trim(),
+        address: address.trim() || undefined,
         items: items.map((item) => ({
           product_id: String(item.id),
           quantity: item.quantity,
@@ -48,6 +63,10 @@ export function useCheckout() {
     items,
     getTotalPrice,
     isSubmitting,
+    customerName,
+    setCustomerName,
+    address,
+    setAddress,
     handlePay,
   };
 }

@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 
 export const orderService = {
-  checkout: async (data: { payment_method: string; items: { product_id: string; quantity: number }[] }) => {
+  checkout: async (data: { payment_method: string; customer_name?: string; address?: string; items: { product_id: string; quantity: number }[] }) => {
     const response = await api.post("/orders", data);
     return response.data;
   },

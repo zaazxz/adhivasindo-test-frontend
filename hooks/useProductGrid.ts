@@ -9,14 +9,21 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
   const user = useAuthStore((state) => state.user);
   const isLoggedIn = !!user;
 
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [quantities, setQuantities] = useState<Record<string, number | string>>({});
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const getQty = (id: number | string) => quantities[String(id)] || 1;
+  const getQty = (id: number | string): number | string => quantities[String(id)] ?? 1;
 
-  const setQty = (id: number | string, val: number) => {
-    setQuantities((prev) => ({ ...prev, [String(id)]: Math.max(1, Math.min(99, val)) }));
+  const setQty = (id: number | string, val: number | string, maxStock: number = 99) => {
+    if (val === "") {
+      setQuantities((prev) => ({ ...prev, [String(id)]: "" }));
+      return;
+    }
+    const num = Number(val);
+    if (!isNaN(num)) {
+      setQuantities((prev) => ({ ...prev, [String(id)]: Math.max(0, Math.min(maxStock, num)) }));
+    }
   };
 
   const handleAddToCart = (prod: Product) => {
@@ -25,7 +32,8 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
       return;
     }
     const key = String(prod.id);
-    addItem(prod, getQty(prod.id));
+    const qty = Number(getQty(prod.id));
+    addItem(prod, qty > 0 ? qty : 1);
     setAddedIds((prev) => new Set(prev).add(key));
     toast.success(`${prod.name} added to cart!`);
     setTimeout(() => {
@@ -37,15 +45,27 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
     }, 1200);
   };
 
+  const isAdmin = user?.role === "admin";
   const activeFilter = selectedCategoryId || null;
   const filtered = products.filter((p) => {
+    // Hide non-active products (draft, inactive) from non-admin users
+    const isNotActive = p.status !== "active";
+    if (isNotActive && !isAdmin) return false;
+
+    const inStock = (p.stock ?? 0) > 0 || isAdmin;
     const matchesCategory = activeFilter ? (p.type_id || p.product_type_id) === activeFilter : true;
     const matchesSearch = searchQuery ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
-    return matchesCategory && matchesSearch;
+    return inStock && matchesCategory && matchesSearch;
   });
 
   const relatedProducts = selectedProduct
-    ? products.filter((p) => (p.type_id || p.product_type_id) === (selectedProduct.type_id || selectedProduct.product_type_id) && p.id !== selectedProduct.id).slice(0, 4)
+    ? products
+        .filter((p) => {
+          const isNotActive = p.status !== "active";
+          if (isNotActive && !isAdmin) return false;
+          return (p.type_id || p.product_type_id) === (selectedProduct.type_id || selectedProduct.product_type_id) && p.id !== selectedProduct.id;
+        })
+        .slice(0, 4)
     : [];
 
   const hasImage = (img?: string | null) => !!img && img.length > 0 && img !== "/banana_juice.png" && img !== "null";

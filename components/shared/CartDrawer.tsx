@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { X, Minus, Plus, Trash2, ImageIcon, LogIn } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -72,8 +72,8 @@ export default function CartDrawer() {
                     <div className="flex gap-3 flex-1 min-w-0">
                       {/* Product thumbnail */}
                       <div className="w-12 h-12 bg-[#f8f9fa] rounded-lg flex items-center justify-center shrink-0">
-                        {item.image && item.image.length > 0 ? (
-                          <img src={item.image} alt={item.name} className="w-10 h-10 object-contain" />
+                        {item.image && item.image.length > 0 && item.image !== "null" ? (
+                          <img src={item.image.startsWith('http') ? item.image : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${item.image}`} alt={item.name} className="w-10 h-10 object-contain" />
                         ) : (
                           <ImageIcon className="w-5 h-5 text-gray-300" strokeWidth={1} />
                         )}
@@ -97,10 +97,28 @@ export default function CartDrawer() {
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="text-xs font-bold text-gray-700 w-5 text-center">{item.quantity}</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "") {
+                                updateQuantity(item.id, 1);
+                                return;
+                              }
+                              const num = parseInt(val, 10);
+                              if (!isNaN(num)) {
+                                const maxStock = item.stock ?? 99;
+                                updateQuantity(item.id, Math.max(1, Math.min(maxStock, num)));
+                              }
+                            }}
+                            className="text-xs font-bold text-gray-700 w-8 text-center bg-transparent outline-none border-b border-transparent focus:border-gray-300 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-green-500 hover:border-green-300 transition-colors cursor-pointer"
+                            disabled={item.stock !== undefined && item.quantity >= item.stock}
+                            className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-green-500 hover:border-green-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400 disabled:hover:border-gray-200"
                           >
                             <Plus className="w-3 h-3" />
                           </button>

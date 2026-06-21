@@ -139,7 +139,10 @@ export default function Topbar() {
       Cookies.remove("access_token");
       Cookies.remove("user_role");
       setUser(null);
-      router.push("/");
+      toast.success("Signed out successfully.");
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
     }
   };
 

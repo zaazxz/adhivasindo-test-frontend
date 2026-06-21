@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { productService } from "@/services/product.service";
 import { orderService } from "@/services/order.service";
 import { toast } from "@/store/useToastStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { FiPlus, FiMinus, FiTrash2, FiSearch, FiImage } from "react-icons/fi";
 
 interface Product {
@@ -25,6 +26,7 @@ export default function TransaksiBaruClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     fetchProducts();
@@ -59,7 +61,7 @@ export default function TransaksiBaruClient() {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
-        if (existing.quantity >= product.stock) {
+        if (existing.quantity >= Number(product.stock)) {
           toast.error("Tidak bisa melebihi stok yang tersedia!");
           return prev;
         }
@@ -73,15 +75,23 @@ export default function TransaksiBaruClient() {
     });
   };
 
-  const updateQuantity = (productId: string, delta: number) => {
+    const updateQuantity = (productId: string, delta: number | string, isAbsolute: boolean = false) => {
     setCart((prev) => {
       return prev.map((item) => {
         if (item.product.id === productId) {
-          const newQty = item.quantity + delta;
-          if (newQty <= 0) return item; // Will be handled by remove
-          if (newQty > item.product.stock) {
+          let newQty: number;
+          if (isAbsolute) {
+            newQty = typeof delta === 'string' ? (delta === '' ? 0 : Number(delta)) : delta;
+            if (isNaN(newQty)) newQty = 1;
+          } else {
+            newQty = item.quantity + Number(delta);
+          }
+          
+          if (newQty <= 0) return item; // Will be handled by remove or blur
+          const maxStock = Number(item.product.stock);
+          if (newQty > maxStock) {
             toast.error("Tidak bisa melebihi stok yang tersedia!");
-            return item;
+            return { ...item, quantity: maxStock };
           }
           return { ...item, quantity: newQty };
         }
@@ -104,6 +114,7 @@ export default function TransaksiBaruClient() {
       setIsSubmitting(true);
       const orderData = {
         payment_method: "cash",
+        customer_name: user?.name || "Admin Kasir",
         items: cart.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity
@@ -219,10 +230,18 @@ export default function TransaksiBaruClient() {
                     >
                       {item.quantity > 1 ? <FiMinus size={12} /> : <FiTrash2 size={12} />}
                     </button>
-                    <span className="text-[12px] font-bold w-4 text-center">{item.quantity}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={item.quantity || ""}
+                      onChange={(e) => updateQuantity(item.product.id, e.target.value, true)}
+                      onBlur={() => { if (!item.quantity || item.quantity < 1) updateQuantity(item.product.id, 1, true); }}
+                      className="text-[12px] font-bold w-8 text-center bg-transparent outline-none border-b border-transparent focus:border-gray-300 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
                     <button 
                       onClick={() => updateQuantity(item.product.id, 1)}
-                      className="w-6 h-6 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-[#3b63f6] transition-colors"
+                      disabled={item.quantity >= Number(item.product.stock)}
+                      className="w-6 h-6 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-[#3b63f6] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <FiPlus size={12} />
                     </button>
