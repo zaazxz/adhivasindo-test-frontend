@@ -72,10 +72,6 @@ To access the dashboard, log in with an administrator account.
 
 1. **Dashboard Parallel Fetching:** Setiap panel di halaman Dashboard (`StatCards`, `SalesChartPanel`, `BestSellerPanel`, `StockPanel`, `RecentTransactionsPanel`) melakukan fetch API secara independen dan paralel. Ini menyebabkan **8 API calls** padahal hanya butuh 3 endpoint (`products`, `productTypes`, `orders`). Idealnya, data di-fetch 1x di parent component lalu di-pass sebagai props untuk mengurangi beban server dan mempercepat loading.
 
-2. **Nama Pelanggan "Tanpa Nama":** Order yang dibuat sebelum implementasi field `customer_name` di checkout akan tetap menampilkan "Tanpa Nama" karena data nama tidak tersimpan di database. Selain itu, backend perlu memastikan kolom `customer_name` ada di migration tabel `orders` dan relasi `user` di-eager-load (`->with('user')`) pada endpoint `GET /api/orders` agar nama pelanggan bisa ditampilkan secara konsisten.
-
-3. **Badge Best Seller:** Fitur badge "Best Seller" di storefront belum tersedia karena endpoint `GET /api/orders` memerlukan autentikasi, sehingga data penjualan tidak dapat diakses oleh user Guest. Diperlukan endpoint publik khusus (misalnya `GET /api/products/best-sellers`) dari backend.
-
 ## 💡 Notes & Disclaimer
 
 *First of all, I sincerely apologize if there are any undiscovered bugs or incomplete edge cases due to the limited time given for this technical test. I have prioritized robust architecture, clean code (custom hooks, constants separation, centralized types), and completing the core requirements.*
