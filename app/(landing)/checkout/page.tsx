@@ -1,53 +1,10 @@
 "use client";
 
-import { useCartStore } from "@/store/useCartStore";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { orderService } from "@/services/order.service";
-import { toast } from "@/store/useToastStore";
+import { useCheckout } from "@/hooks/useCheckout";
+import { FORMAT_RUPIAH } from "@/constants";
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice, clearCart } = useCartStore();
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handlePay = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (items.length === 0) {
-      toast.error("Cart is empty");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const payload = {
-        payment_method: "cash",
-        items: items.map(item => ({
-          product_id: String(item.id),
-          quantity: item.quantity,
-        }))
-      };
-
-      const res = await orderService.checkout(payload);
-      clearCart();
-      toast.success("Order placed successfully!");
-      
-      const orderId = res.data?.id || res.id;
-      if (orderId) {
-        router.push(`/invoice/${orderId}`);
-      } else {
-        // Fallback if structure is weird
-        router.push(`/orders`);
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to process order.");
-      console.error(error);
-      setIsSubmitting(false);
-    }
-  };
-
-  const formatRupiah = (n: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+  const { items, getTotalPrice, isSubmitting, handlePay } = useCheckout();
 
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -105,7 +62,7 @@ export default function CheckoutPage() {
                     <div className="text-sm font-bold text-gray-700 line-clamp-1">{item.name}</div>
                     <div className="text-xs text-gray-400 mt-0.5">Qty: {item.quantity}</div>
                   </div>
-                  <div className="text-sm font-bold text-gray-800 ml-2 whitespace-nowrap">{formatRupiah(Number(item.price) * item.quantity)}</div>
+                  <div className="text-sm font-bold text-gray-800 ml-2 whitespace-nowrap">{FORMAT_RUPIAH(Number(item.price) * item.quantity)}</div>
                 </div>
               ))}
               {items.length === 0 && (
@@ -116,7 +73,7 @@ export default function CheckoutPage() {
             <div className="border-t border-gray-100 pt-4 space-y-2 mb-6">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Subtotal</span>
-                <span className="font-bold text-gray-800">{formatRupiah(getTotalPrice())}</span>
+                <span className="font-bold text-gray-800">{FORMAT_RUPIAH(getTotalPrice())}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Shipping</span>
@@ -126,7 +83,7 @@ export default function CheckoutPage() {
             
             <div className="flex justify-between items-center mb-6 pt-4 border-t border-gray-100">
               <span className="text-base font-bold text-gray-800">Total</span>
-              <span className="text-xl font-extrabold text-[#f59e0b]">{formatRupiah(getTotalPrice())}</span>
+              <span className="text-xl font-extrabold text-[#f59e0b]">{FORMAT_RUPIAH(getTotalPrice())}</span>
             </div>
             
             <button 

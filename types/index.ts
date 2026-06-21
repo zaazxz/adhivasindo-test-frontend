@@ -43,3 +43,17 @@ export interface StatCardData {
   icon: ElementType;
   accent: string;
 }
+
+export interface CategorySectionProps {
+  categories: Category[];
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+}
+
+export interface ProductGridProps {
+  products: Product[];
+  categories?: Category[];
+  selectedCategoryId?: string | null;
+  onCategoryChange?: (id: string | null) => void;
+  searchQuery?: string;
+}

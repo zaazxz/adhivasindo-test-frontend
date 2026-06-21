@@ -1,17 +1,9 @@
 "use client";
 
 import { ImageIcon, X, ShoppingCart, Package, ChevronRight } from "lucide-react";
-import { Category, Product } from "@/types";
+import { Category, Product, ProductGridProps } from "@/types";
 import { useProductGrid } from "@/hooks/useProductGrid";
 import { FORMAT_RUPIAH } from "@/constants";
-
-interface ProductGridProps {
-  products: Product[];
-  categories?: Category[];
-  selectedCategoryId?: string | null;
-  onCategoryChange?: (id: string | null) => void;
-  searchQuery?: string;
-}
 
 export default function ProductGrid({ products, categories = [], selectedCategoryId, onCategoryChange, searchQuery = "" }: ProductGridProps) {
   const {
@@ -104,7 +96,7 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                 </div>
                 <h3 className="text-[12px] font-bold text-gray-500 mb-1 line-clamp-1">{prod.name}</h3>
                 <p className="text-[15px] font-extrabold text-gray-900 mb-3">
-                  {formatRupiah(Number(prod.price))}
+                  {FORMAT_RUPIAH(Number(prod.price))}
                 </p>
                 <div className="flex items-center justify-between mt-auto pt-1">
                   <div className="flex items-center gap-3 text-xs font-semibold text-gray-400">

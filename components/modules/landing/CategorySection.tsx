@@ -1,13 +1,7 @@
 "use client";
 
 import { ImageIcon } from "lucide-react";
-import { Category } from "@/types";
-
-interface CategorySectionProps {
-  categories: Category[];
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
-}
+import { Category, CategorySectionProps } from "@/types";
 
 export default function CategorySection({ categories, selectedId, onSelect }: CategorySectionProps) {
   return (
