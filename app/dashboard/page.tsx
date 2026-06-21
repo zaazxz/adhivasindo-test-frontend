@@ -12,14 +12,14 @@ export default function DashboardPage() {
   return (
     <>
       <StatCards />
-      <div className="grid grid-cols-10 gap-5 items-stretch">
-        <div className="col-span-4 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 items-stretch">
+        <div className="lg:col-span-4 h-full">
           <SalesChartPanel />
         </div>
-        <div className="col-span-3 h-full">
+        <div className="lg:col-span-3 h-full">
           <BestSellerPanel />
         </div>
-        <div className="col-span-3 h-full">
+        <div className="lg:col-span-3 h-full">
           <StockPanel />
         </div>
       </div>
