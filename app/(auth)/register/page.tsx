@@ -4,18 +4,40 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import { toast } from "@/store/useToastStore";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== passwordConfirmation) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await authService.register({ 
+        name, 
+        email, 
+        password, 
+        password_confirmation: passwordConfirmation 
+      });
+      toast.success("Account created successfully! Please login.");
+      router.push("/login");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
       setIsLoading(false);
-      router.push("/");
-    }, 1000);
+    }
   };
 
   return (
@@ -31,6 +53,8 @@ export default function RegisterPage() {
           <input 
             type="text" 
             placeholder="John Doe"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
           />
@@ -41,6 +65,8 @@ export default function RegisterPage() {
           <input 
             type="email" 
             placeholder="hello@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
           />
@@ -51,6 +77,20 @@ export default function RegisterPage() {
           <input 
             type="password" 
             placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
+          />
+        </div>
+
+        <div>
+          <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5">Confirm Password</label>
+          <input 
+            type="password" 
+            placeholder="••••••••"
+            value={passwordConfirmation}
+            onChange={(e) => setPasswordConfirmation(e.target.value)}
             required
             className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
           />

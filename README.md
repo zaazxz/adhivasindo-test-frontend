@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Adhivasindo E-Commerce Frontend Assessment
 
-## Getting Started
+This project is the Frontend application for the recruitment test at **PT. Adhikari Inovasi Indonesia (Adhivasindo)**. It is a full-fledged Next.js E-Commerce storefront and an admin dashboard, tightly integrated with a Laravel API backend.
 
-First, run the development server:
+## 🔗 Related Repository
+* **Backend Repository:** [https://github.com/zaazxz/adhivasindo-test-backend](https://github.com/zaazxz/adhivasindo-test-backend)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🛠 Tech Stack
+This project leverages modern frontend technologies for high performance and excellent developer experience:
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **State Management:** Zustand (for Cart, Auth, and UI state)
+- **HTTP Client:** Axios (configured with interceptors and cookie management)
+- **Icons:** Lucide React & React Icons
+- **Date Management:** date-fns
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Follow these instructions to get the project up and running on your local machine.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+- Node.js (v18.17 or higher recommended)
+- The backend API must be running locally (default: `http://localhost:8000`)
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository**
+   ```bash
+   git clone <your-repository-url>
+   cd fe-olshop-adivashindo
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Environment Setup**
+   Create a `.env.local` file in the root directory and specify the backend API URL:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000/api
+   ```
 
-## Deploy on Vercel
+4. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Open the Application**
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 Features & Usage Tutorial
+
+### Storefront (Landing Page)
+- **Browsing Products:** View all available products directly on the landing page. Use the category filters at the top or the search bar to find specific items.
+- **Cart System:** Click "Add to Cart" on any product. A floating shopping cart will store your items persistently using Zustand.
+- **Checkout:** Once you have items in your cart, click the Cart icon to review and click "Checkout" to place an order (requires login).
+
+### Admin Dashboard (`/dashboard`)
+To access the dashboard, log in with an administrator account.
+- **Master Barang:** Manage your product catalog. You can add new products, edit descriptions and prices, upload images, and manage stock.
+- **Tipe Produk:** Create and manage product categories.
+- **Riwayat Transaksi:** View a comprehensive list of all customer orders. You can print invoices, change order statuses (e.g., from "Pending" to "Paid"), and track shipments.
+- **Dashboard Analytics:** View real-time statistics, a sales chart, and a Best Seller list based on completed transactions.
+
+## 💡 Notes & Disclaimer
+
+*First of all, I sincerely apologize if there are any undiscovered bugs or incomplete edge cases due to the limited time given for this technical test. I have prioritized robust architecture, clean code (custom hooks, constants separation, centralized types), and completing the core requirements.*
+
+I am highly open to constructive **criticism and suggestions**. I view this test as a great learning opportunity and I am eager to improve my skills and learn the best practices used at PT. Adhikari Inovasi Indonesia. 
+
+Thank you for your time and consideration!

@@ -1,23 +1,116 @@
 "use client";
 
-import { useState } from "react";
-import { FiSearch, FiBell, FiUser, FiMenu, FiX, FiSettings, FiLogOut, FiCheck } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiSearch, FiBell, FiUser, FiMenu, FiX, FiSettings, FiLogOut, FiCheck, FiShoppingBag } from "react-icons/fi";
 import { useSidebarStore } from "@/store/useSidebarStore";
+import { authService } from "@/services/auth.service";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
+import { toast } from "@/store/useToastStore";
+import { orderService } from "@/services/order.service";
+import { productService } from "@/services/product.service";
+import Link from "next/link";
 
-const dummyNotifications = [
-  { id: 1, title: "Pesanan baru masuk", desc: "Order #1234 dari John", time: "2 menit lalu", read: false },
-  { id: 2, title: "Stok hampir habis", desc: "Melon Juice tinggal 5", time: "15 menit lalu", read: false },
-  { id: 3, title: "Pembayaran diterima", desc: "Order #1230 confirmed", time: "1 jam lalu", read: true },
-  { id: 4, title: "Promo aktif", desc: "Flash sale dimulai", time: "3 jam lalu", read: true },
+interface Notification {
+  id: number;
+  title: string;
+  desc: string;
+  time: string;
+  read: boolean;
+  link?: string;
+}
+
+const searchablePages = [
+  { name: "Dashboard Overview", path: "/dashboard", icon: "FiHome" },
+  { name: "Master Barang (Products)", path: "/dashboard/master-barang", icon: "FiBox" },
+  { name: "Tipe Produk (Categories)", path: "/dashboard/tipe-produk", icon: "FiBox" },
+  { name: "Transaksi Baru", path: "/dashboard/transaksi/baru", icon: "FiShoppingCart" },
+  { name: "Riwayat Transaksi", path: "/dashboard/transaksi/riwayat", icon: "FiShoppingCart" },
+  { name: "Settings", path: "/dashboard/settings", icon: "FiSettings" },
+  { name: "Public Storefront", path: "/", icon: "FiShoppingBag" },
 ];
 
 export default function Topbar() {
+  const router = useRouter();
   const toggleSidebar = useSidebarStore((state) => state.toggle);
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
-  const [notifications, setNotifications] = useState(dummyNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Fetch real notifications from orders & products
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const [ordersRes, productsRes] = await Promise.allSettled([
+          orderService.getAll(),
+          productService.getAll(),
+        ]);
+
+        const notifs: Notification[] = [];
+        let notifId = 1;
+
+        // Order-based notifications
+        if (ordersRes.status === "fulfilled") {
+          const ordersData = ordersRes.value.data?.data || ordersRes.value.data || ordersRes.value || [];
+          const pending = (Array.isArray(ordersData) ? ordersData : []).filter((o: any) => (o.status || "").toLowerCase() === "pending");
+          pending.slice(0, 3).forEach((o: any) => {
+            notifs.push({
+              id: notifId++,
+              title: "Pesanan menunggu ACC",
+              desc: `${o.order_no || '#' + String(o.id).substring(0,6)} dari ${o.user?.name || 'Customer'}`,
+              time: new Date(o.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+              read: false,
+              link: "/dashboard/transaksi/riwayat",
+            });
+          });
+        }
+
+        // Low stock notifications
+        if (productsRes.status === "fulfilled") {
+          const productsData = productsRes.value.data || productsRes.value || [];
+          const lowStock = (Array.isArray(productsData) ? productsData : []).filter((p: any) => (p.stock || 0) <= 5 && (p.stock || 0) > 0);
+          lowStock.slice(0, 2).forEach((p: any) => {
+            notifs.push({
+              id: notifId++,
+              title: "Stok hampir habis",
+              desc: `${p.name} tinggal ${p.stock}`,
+              time: "Cek sekarang",
+              read: false,
+              link: "/dashboard/master-barang",
+            });
+          });
+
+          const outOfStock = (Array.isArray(productsData) ? productsData : []).filter((p: any) => (p.stock || 0) === 0);
+          outOfStock.slice(0, 2).forEach((p: any) => {
+            notifs.push({
+              id: notifId++,
+              title: "Stok habis!",
+              desc: `${p.name} perlu restock`,
+              time: "Segera",
+              read: false,
+              link: "/dashboard/master-barang",
+            });
+          });
+        }
+
+        if (notifs.length === 0) {
+          notifs.push({ id: 1, title: "Semua aman 👍", desc: "Tidak ada notifikasi baru", time: "Just now", read: true });
+        }
+
+        setNotifications(notifs);
+      } catch (error) {
+        console.error("Failed to fetch notifications", error);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const filteredPages = searchablePages.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -35,6 +128,19 @@ export default function Topbar() {
     setNotifOpen(false);
     setUserOpen(false);
     setSearchOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      Cookies.remove("access_token");
+      Cookies.remove("user_role");
+      setUser(null);
+      router.push("/");
+    }
   };
 
   return (
@@ -63,20 +169,52 @@ export default function Topbar() {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3 md:gap-5">
-        {/* Search Bar - hidden on small screens */}
-        <div className="hidden sm:flex items-center gap-2 bg-[#5176f7] rounded-md px-3 py-1.5 w-[180px] md:w-[280px]">
+        <div className="hidden sm:flex items-center gap-2 bg-[#5176f7] rounded-md px-3 py-1.5 w-[180px] md:w-[280px] relative">
           <FiSearch className="text-white/80 text-sm shrink-0" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
+            onFocus={() => setSearchOpen(true)}
+            placeholder="Search pages..."
             className="border-none outline-none text-[13px] text-white bg-transparent w-full placeholder-white/80"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="text-white/60 hover:text-white">
+            <button onClick={() => { setSearchQuery(""); setSearchOpen(false); }} className="text-white/60 hover:text-white">
               <FiX size={14} />
             </button>
+          )}
+
+          {/* Command Palette Dropdown */}
+          {searchOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setSearchOpen(false)} />
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 border-b border-gray-100">
+                  Pages
+                </div>
+                <div className="max-h-[250px] overflow-y-auto">
+                  {filteredPages.length > 0 ? (
+                    filteredPages.map((page, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setSearchOpen(false);
+                          setSearchQuery("");
+                          router.push(page.path);
+                        }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-blue-50 hover:text-[#3b63f6] text-gray-700 text-xs font-medium transition-colors flex justify-between items-center"
+                      >
+                        {page.name}
+                        <FiCheck className="text-transparent" />
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-xs text-gray-400 text-center">No pages found</div>
+                  )}
+                </div>
+              </div>
+            </>
           )}
         </div>
 
@@ -122,7 +260,7 @@ export default function Topbar() {
                   {notifications.map((notif) => (
                     <button
                       key={notif.id}
-                      onClick={() => { markRead(notif.id); alert(`${notif.title}: ${notif.desc}`); }}
+                      onClick={() => { markRead(notif.id); toast.info(`${notif.title}: ${notif.desc}`); }}
                       className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-blue-50 transition-colors ${
                         !notif.read ? "bg-blue-50/50" : ""
                       }`}
@@ -141,7 +279,7 @@ export default function Topbar() {
                   ))}
                 </div>
                 <button
-                  onClick={() => { closeAll(); alert("View all notifications (Dummy)"); }}
+                  onClick={() => { closeAll(); toast.info("All notifications coming soon!"); }}
                   className="w-full text-center py-2.5 text-[10px] font-bold text-[#3b63f6] hover:bg-gray-50 transition-colors"
                 >
                   View All Notifications
@@ -160,7 +298,7 @@ export default function Topbar() {
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
               <FiUser size={14} />
             </div>
-            <span className="text-[12px] font-medium hidden md:block">Admin</span>
+            <span className="text-[12px] font-medium hidden md:block">{user?.name || "Admin"}</span>
           </button>
 
           {userOpen && (
@@ -168,24 +306,33 @@ export default function Topbar() {
               <div className="fixed inset-0 z-40" onClick={closeAll} />
               <div className="absolute right-0 top-full mt-3 bg-white rounded-xl shadow-2xl border border-gray-100 w-52 z-50 overflow-hidden">
                 <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                  <div className="text-[12px] font-bold text-gray-800">Admin User</div>
-                  <div className="text-[10px] text-gray-400">admin@adivashindo.com</div>
+                  <div className="text-[12px] font-bold text-gray-800">{user?.name || "Admin User"}</div>
+                  <div className="text-[10px] text-gray-400">{user?.email || "admin@adivashindo.com"}</div>
                 </div>
                 <button
-                  onClick={() => { closeAll(); alert("Profile Settings (Dummy)"); }}
+                  onClick={() => { closeAll(); router.push("/dashboard/settings"); }}
                   className="w-full text-left px-4 py-2.5 text-[11px] font-medium text-gray-600 hover:bg-blue-50 hover:text-[#3b63f6] transition-colors flex items-center gap-3"
                 >
                   <FiUser size={14} /> My Profile
                 </button>
                 <button
-                  onClick={() => { closeAll(); alert("Settings page (Dummy)"); }}
+                  onClick={() => { closeAll(); router.push("/dashboard/settings"); }}
                   className="w-full text-left px-4 py-2.5 text-[11px] font-medium text-gray-600 hover:bg-blue-50 hover:text-[#3b63f6] transition-colors flex items-center gap-3"
                 >
                   <FiSettings size={14} /> Settings
                 </button>
+                <button
+                  onClick={() => { closeAll(); router.push("/"); }}
+                  className="w-full text-left px-4 py-2.5 text-[11px] font-medium text-gray-600 hover:bg-blue-50 hover:text-[#3b63f6] transition-colors flex items-center gap-3"
+                >
+                  <FiShoppingBag size={14} /> Go to Store
+                </button>
                 <div className="border-t border-gray-100">
                   <button
-                    onClick={() => { closeAll(); alert("Logged out (Dummy)"); }}
+                    onClick={() => {
+                      closeAll();
+                      handleLogout();
+                    }}
                     className="w-full text-left px-4 py-2.5 text-[11px] font-bold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"
                   >
                     <FiLogOut size={14} /> Logout

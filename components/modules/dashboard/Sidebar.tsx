@@ -4,11 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  MdOutlineInventory2,
-  MdOutlineShield,
   MdKeyboardArrowDown,
 } from "react-icons/md";
-import { FiHome } from "react-icons/fi";
+import { FiHome, FiBox, FiShoppingCart, FiSettings, FiShoppingBag } from "react-icons/fi";
 import type { IconType } from "react-icons";
 import { useSidebarStore } from "@/store/useSidebarStore";
 
@@ -44,22 +42,32 @@ const navItems: NavGroup[] = [
     ],
   },
   {
-    section: "PAGES",
-    sectionSub: "Prebuild Pages",
+    section: "STOREFRONT",
+    sectionSub: "Public Website",
     items: [
       {
-        label: "Master Barang",
-        href: "/dashboard/master-barang",
-        icon: MdOutlineInventory2,
+        label: "Go to Store",
+        href: "/",
+        icon: FiShoppingBag,
       },
+    ],
+  },
+  {
+    section: "PAGES",
+    sectionSub: "Management",
+    items: [
       {
-        label: "Tipe Produk",
-        href: "/dashboard/tipe-produk",
-        icon: MdOutlineInventory2,
+        label: "Katalog",
+        icon: FiBox,
+        hasArrow: true,
+        subItems: [
+          { label: "Master Barang", href: "/dashboard/master-barang" },
+          { label: "Tipe Produk", href: "/dashboard/tipe-produk" },
+        ],
       },
       {
         label: "Transaksi",
-        icon: MdOutlineShield,
+        icon: FiShoppingCart,
         hasArrow: true,
         subItems: [
           { label: "Transaksi Baru", href: "/dashboard/transaksi/baru" },
@@ -67,14 +75,9 @@ const navItems: NavGroup[] = [
         ],
       },
       {
-        label: "User Management",
-        href: "/dashboard/user",
-        icon: MdOutlineShield,
-      },
-      {
         label: "Settings",
         href: "/dashboard/settings",
-        icon: MdOutlineShield,
+        icon: FiSettings,
       },
     ],
   },

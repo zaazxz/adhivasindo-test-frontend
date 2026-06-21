@@ -4,18 +4,57 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import Cookies from "js-cookie";
+import { useAuthStore } from "@/store/useAuthStore";
+import { toast } from "@/store/useToastStore";
 
 export default function LoginPage() {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await authService.login({ email, password });
+      if (res.access_token) {
+        Cookies.set("access_token", res.access_token);
+        
+        // Fetch user data untuk mendapatkan role
+        try {
+          const userData = await authService.me();
+          // Antisipasi jika object user ada di dalam data.user atau langsung di data
+          const user = userData.user || userData;
+          
+          setUser(user);
+
+          if (user?.role) {
+             Cookies.set("user_role", user.role);
+          }
+          
+          if (user?.role === "customer") {
+             toast.success("Welcome back to Kkomi!");
+             router.push("/");
+          } else {
+             toast.success("Welcome back, Admin!");
+             router.push("/dashboard"); 
+          }
+        } catch (meError) {
+           console.error("Failed to fetch user data:", meError);
+           toast.success("Login successful!");
+           router.push("/dashboard"); 
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Login failed. Please check your credentials.");
+    } finally {
       setIsLoading(false);
-      router.push("/");
-    }, 1000);
+    }
   };
 
   return (
@@ -31,6 +70,8 @@ export default function LoginPage() {
           <input 
             type="email" 
             placeholder="hello@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
           />
@@ -44,6 +85,8 @@ export default function LoginPage() {
           <input 
             type="password" 
             placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
             className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
           />

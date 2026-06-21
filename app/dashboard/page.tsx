@@ -2,6 +2,7 @@ import StatCards from "@/components/modules/dashboard/StatCards";
 import SalesChartPanel from "@/components/modules/dashboard/SalesChartPanel";
 import BestSellerPanel from "@/components/modules/dashboard/BestSellerPanel";
 import StockPanel from "@/components/modules/dashboard/StockPanel";
+import RecentTransactionsPanel from "@/components/modules/dashboard/RecentTransactionsPanel";
 
 export const metadata = {
   title: "Dashboard - Adivashindo",
@@ -22,6 +23,9 @@ export default function DashboardPage() {
         <div className="lg:col-span-3 h-full">
           <StockPanel />
         </div>
+      </div>
+      <div className="w-full">
+        <RecentTransactionsPanel />
       </div>
     </>
   );

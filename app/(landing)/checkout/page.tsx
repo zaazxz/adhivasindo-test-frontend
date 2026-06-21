@@ -2,15 +2,52 @@
 
 import { useCartStore } from "@/store/useCartStore";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { orderService } from "@/services/order.service";
+import { toast } from "@/store/useToastStore";
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice } = useCartStore();
+  const { items, getTotalPrice, clearCart } = useCartStore();
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handlePay = (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/invoice");
+    if (items.length === 0) {
+      toast.error("Cart is empty");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const payload = {
+        payment_method: "cash",
+        items: items.map(item => ({
+          product_id: String(item.id),
+          quantity: item.quantity,
+        }))
+      };
+
+      const res = await orderService.checkout(payload);
+      clearCart();
+      toast.success("Order placed successfully!");
+      
+      const orderId = res.data?.id || res.id;
+      if (orderId) {
+        router.push(`/invoice/${orderId}`);
+      } else {
+        // Fallback if structure is weird
+        router.push(`/orders`);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to process order.");
+      console.error(error);
+      setIsSubmitting(false);
+    }
   };
+
+  const formatRupiah = (n: number) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -18,6 +55,7 @@ export default function CheckoutPage() {
       
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex-1">
+          {/* Shipping Form is hidden / auto-filled for now since API might not need it, or we just keep the form for visual completeness */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Shipping Information</h2>
             <form id="checkout-form" onSubmit={handlePay} className="space-y-4">
@@ -42,16 +80,16 @@ export default function CheckoutPage() {
             <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Payment Method</h2>
             <div className="space-y-3">
               <label className="flex items-center gap-3 p-3 border border-amber-200 bg-amber-50 rounded-xl cursor-pointer">
-                <input type="radio" name="payment" defaultChecked className="text-[#f59e0b] focus:ring-[#f59e0b]" />
-                <span className="font-bold text-sm text-gray-800">Bank Transfer (Virtual Account)</span>
+                <input type="radio" name="payment" defaultChecked value="cash" className="text-[#f59e0b] focus:ring-[#f59e0b]" />
+                <span className="font-bold text-sm text-gray-800">Cash (COD)</span>
               </label>
-              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50">
-                <input type="radio" name="payment" className="text-[#f59e0b] focus:ring-[#f59e0b]" />
-                <span className="font-bold text-sm text-gray-800">Credit / Debit Card</span>
+              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-xl opacity-50 cursor-not-allowed">
+                <input type="radio" name="payment" disabled className="text-[#f59e0b] focus:ring-[#f59e0b]" />
+                <span className="font-bold text-sm text-gray-800">Bank Transfer (Coming Soon)</span>
               </label>
-              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50">
-                <input type="radio" name="payment" className="text-[#f59e0b] focus:ring-[#f59e0b]" />
-                <span className="font-bold text-sm text-gray-800">E-Wallet (OVO, GoPay)</span>
+              <label className="flex items-center gap-3 p-3 border border-gray-100 rounded-xl opacity-50 cursor-not-allowed">
+                <input type="radio" name="payment" disabled className="text-[#f59e0b] focus:ring-[#f59e0b]" />
+                <span className="font-bold text-sm text-gray-800">E-Wallet (Coming Soon)</span>
               </label>
             </div>
           </div>
@@ -64,10 +102,10 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between items-start">
                   <div>
-                    <div className="text-sm font-bold text-gray-700">{item.name}</div>
+                    <div className="text-sm font-bold text-gray-700 line-clamp-1">{item.name}</div>
                     <div className="text-xs text-gray-400 mt-0.5">Qty: {item.quantity}</div>
                   </div>
-                  <div className="text-sm font-bold text-gray-800">Rp. {(item.price * item.quantity).toLocaleString('id-ID')}</div>
+                  <div className="text-sm font-bold text-gray-800 ml-2 whitespace-nowrap">{formatRupiah(Number(item.price) * item.quantity)}</div>
                 </div>
               ))}
               {items.length === 0 && (
@@ -78,7 +116,7 @@ export default function CheckoutPage() {
             <div className="border-t border-gray-100 pt-4 space-y-2 mb-6">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Subtotal</span>
-                <span className="font-bold text-gray-800">Rp. {getTotalPrice().toLocaleString('id-ID')}</span>
+                <span className="font-bold text-gray-800">{formatRupiah(getTotalPrice())}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Shipping</span>
@@ -88,16 +126,26 @@ export default function CheckoutPage() {
             
             <div className="flex justify-between items-center mb-6 pt-4 border-t border-gray-100">
               <span className="text-base font-bold text-gray-800">Total</span>
-              <span className="text-xl font-extrabold text-[#f59e0b]">Rp. {getTotalPrice().toLocaleString('id-ID')}</span>
+              <span className="text-xl font-extrabold text-[#f59e0b]">{formatRupiah(getTotalPrice())}</span>
             </div>
             
             <button 
               type="submit" 
               form="checkout-form"
-              disabled={items.length === 0}
-              className="w-full bg-[#fbbf24] hover:bg-[#f59e0b] disabled:bg-gray-200 text-white font-bold py-3.5 rounded-lg text-sm transition-all shadow-md active:scale-95"
+              disabled={items.length === 0 || isSubmitting}
+              className="w-full bg-[#fbbf24] hover:bg-[#f59e0b] disabled:bg-gray-200 text-white font-bold py-3.5 rounded-lg text-sm transition-all shadow-md active:scale-95 flex justify-center items-center gap-2 cursor-pointer"
             >
-              Place Order
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                "Place Order"
+              )}
             </button>
           </div>
         </div>
