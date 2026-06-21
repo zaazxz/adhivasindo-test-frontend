@@ -68,10 +68,6 @@ To access the dashboard, log in with an administrator account.
 - **Riwayat Transaksi:** View a comprehensive list of all customer orders. You can print invoices, change order statuses (e.g., from "Pending" to "Paid"), and track shipments.
 - **Dashboard Analytics:** View real-time statistics, a sales chart, and a Best Seller list based on completed transactions.
 
-## ⚠️ Known Bugs & Limitations
-
-1. **Dashboard Parallel Fetching:** Setiap panel di halaman Dashboard (`StatCards`, `SalesChartPanel`, `BestSellerPanel`, `StockPanel`, `RecentTransactionsPanel`) melakukan fetch API secara independen dan paralel. Ini menyebabkan **8 API calls** padahal hanya butuh 3 endpoint (`products`, `productTypes`, `orders`). Idealnya, data di-fetch 1x di parent component lalu di-pass sebagai props untuk mengurangi beban server dan mempercepat loading.
-
 ## 💡 Notes & Disclaimer
 
 *First of all, I sincerely apologize if there are any undiscovered bugs or incomplete edge cases due to the limited time given for this technical test. I have prioritized robust architecture, clean code (custom hooks, constants separation, centralized types), and completing the core requirements.*
