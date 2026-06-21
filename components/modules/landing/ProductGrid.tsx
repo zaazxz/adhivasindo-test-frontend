@@ -1,6 +1,8 @@
 "use client";
 
 import { ImageIcon, X, ShoppingCart, Package, ChevronRight } from "lucide-react";
+import ImageWithSkeleton from "@/components/ui/ImageWithSkeleton";
+
 import { Category, Product, ProductGridProps } from "@/types";
 import { useProductGrid } from "@/hooks/useProductGrid";
 import { FORMAT_RUPIAH } from "@/constants";
@@ -33,11 +35,10 @@ export default function ProductGrid({ products, categories = [], selectedCategor
           <div className="flex gap-4 md:gap-6 text-[10px] font-bold tracking-[1px] text-gray-400 uppercase flex-wrap">
             <button
               onClick={() => onCategoryChange?.(null)}
-              className={`transition-colors pb-2 px-1 cursor-pointer ${
-                !activeFilter
+              className={`transition-colors pb-2 px-1 cursor-pointer ${!activeFilter
                   ? "text-[#f59e0b] border-b-[3px] border-[#f59e0b]"
                   : "hover:text-gray-600 border-b-[3px] border-transparent"
-              }`}
+                }`}
             >
               All
             </button>
@@ -45,11 +46,10 @@ export default function ProductGrid({ products, categories = [], selectedCategor
               <button
                 key={cat.id || cat.name}
                 onClick={() => onCategoryChange?.(cat.id || null)}
-                className={`transition-colors pb-2 px-1 cursor-pointer ${
-                  activeFilter === cat.id
+                className={`transition-colors pb-2 px-1 cursor-pointer ${activeFilter === cat.id
                     ? "text-[#f59e0b] border-b-[3px] border-[#f59e0b]"
                     : "hover:text-gray-600 border-b-[3px] border-transparent"
-                }`}
+                  }`}
               >
                 {cat.name}
               </button>
@@ -69,7 +69,7 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                   className="bg-[#f8f9fa] rounded-2xl p-6 mb-4 aspect-square flex items-center justify-center relative overflow-hidden cursor-pointer"
                 >
                   {hasImage(prod.image) ? (
-                    <img
+                    <ImageWithSkeleton
                       src={getImageUrl(prod.image || prod.image_url)}
                       alt={prod.name}
                       className="w-[130px] h-[130px] object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500 ease-out"
@@ -117,13 +117,12 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                   <button
                     onClick={() => handleAddToCart(prod)}
                     disabled={isAdded || outOfStock}
-                    className={`text-[11px] font-bold transition-all cursor-pointer ${
-                      isAdded
+                    className={`text-[11px] font-bold transition-all cursor-pointer ${isAdded
                         ? "text-green-500"
                         : outOfStock
-                        ? "text-gray-300 cursor-not-allowed"
-                        : "text-gray-400 hover:text-[#f59e0b] active:scale-95"
-                    }`}
+                          ? "text-gray-300 cursor-not-allowed"
+                          : "text-gray-400 hover:text-[#f59e0b] active:scale-95"
+                      }`}
                   >
                     {isAdded ? "Added ✓" : outOfStock ? "Unavailable" : "Add to Cart"}
                   </button>
@@ -160,9 +159,9 @@ export default function ProductGrid({ products, categories = [], selectedCategor
             <div className="flex-1 overflow-y-auto p-6 md:p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto">
                 {/* Product Image */}
-                <div className="bg-[#f8f9fa] rounded-2xl aspect-square flex items-center justify-center p-8">
+                <div className="bg-[#f8f9fa] rounded-2xl aspect-square flex items-center justify-center p-8 relative overflow-hidden">
                   {hasImage(selectedProduct.image) ? (
-                    <img
+                    <ImageWithSkeleton
                       src={getImageUrl(selectedProduct.image || selectedProduct.image_url)}
                       alt={selectedProduct.name}
                       className="w-[320px] h-[320px] object-contain drop-shadow-lg"
@@ -270,9 +269,9 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                         onClick={() => setSelectedProduct(rp)}
                         className="cursor-pointer group/related"
                       >
-                        <div className="bg-[#f8f9fa] rounded-xl p-4 aspect-square flex items-center justify-center mb-3">
+                        <div className="bg-[#f8f9fa] rounded-xl p-4 aspect-square flex items-center justify-center mb-3 relative overflow-hidden">
                           {hasImage(rp.image) ? (
-                            <img
+                            <ImageWithSkeleton
                               src={getImageUrl(rp.image || rp.image_url)}
                               alt={rp.name}
                               className="w-[100px] h-[100px] object-contain group-hover/related:scale-110 transition-transform duration-300"

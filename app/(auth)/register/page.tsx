@@ -1,44 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { UserPlus } from "lucide-react";
-import { authService } from "@/services/auth.service";
-import { toast } from "@/store/useToastStore";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
+import { useRegister } from "@/hooks/useRegister";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== passwordConfirmation) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await authService.register({ 
-        name, 
-        email, 
-        password, 
-        password_confirmation: passwordConfirmation 
-      });
-      toast.success("Account created successfully! Please login.");
-      router.push("/login");
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    passwordConfirmation,
+    setPasswordConfirmation,
+    showPassword,
+    setShowPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
+    isLoading,
+    handleSubmit
+  } = useRegister();
 
   return (
     <div className="w-full max-w-sm mx-auto animate-[fadeIn_0.3s_ease-out]">
@@ -74,26 +56,44 @@ export default function RegisterPage() {
 
         <div>
           <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5">Password</label>
-          <input 
-            type="password" 
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
-          />
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         <div>
           <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5">Confirm Password</label>
-          <input 
-            type="password" 
-            placeholder="••••••••"
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-            required
-            className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
-          />
+          <div className="relative">
+            <input 
+              type={showConfirmPassword ? "text" : "password"} 
+              placeholder="••••••••"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              required
+              className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         <button 

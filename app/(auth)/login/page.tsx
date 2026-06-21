@@ -1,61 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { LogIn } from "lucide-react";
-import { authService } from "@/services/auth.service";
-import Cookies from "js-cookie";
-import { useAuthStore } from "@/store/useAuthStore";
-import { toast } from "@/store/useToastStore";
+import { LogIn, Eye, EyeOff } from "lucide-react";
+import { useLogin } from "@/hooks/useLogin";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const res = await authService.login({ email, password });
-      if (res.access_token) {
-        Cookies.set("access_token", res.access_token);
-        
-        // Fetch user data untuk mendapatkan role
-        try {
-          const userData = await authService.me();
-          // Antisipasi jika object user ada di dalam data.user atau langsung di data
-          const user = userData.user || userData;
-          
-          setUser(user);
-
-          if (user?.role) {
-             Cookies.set("user_role", user.role);
-          }
-          
-          if (user?.role === "customer") {
-             toast.success("Welcome back to Kkomi!");
-             router.push("/");
-          } else {
-             toast.success("Welcome back, Admin!");
-             router.push("/dashboard"); 
-          }
-        } catch (meError) {
-           console.error("Failed to fetch user data:", meError);
-           toast.success("Login successful!");
-           router.push("/dashboard"); 
-        }
-      }
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Login failed. Please check your credentials.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    setShowPassword,
+    isLoading,
+    handleSubmit
+  } = useLogin();
 
   return (
     <div className="w-full max-w-sm mx-auto animate-[fadeIn_0.3s_ease-out]">
@@ -78,23 +37,29 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wide">Password</label>
-            <a href="#" className="text-[11px] font-bold text-[#f59e0b] hover:text-amber-600 transition-colors">Forgot password?</a>
+          <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-2">Password</label>
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
-          <input 
-            type="password" 
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-[#f59e0b] focus:ring-4 focus:ring-amber-50 focus:bg-white transition-all"
-          />
         </div>
 
         <div className="flex items-center gap-2">
           <input type="checkbox" id="remember" className="rounded border-gray-300 text-[#f59e0b] focus:ring-[#f59e0b] cursor-pointer" />
-          <label htmlFor="remember" className="text-xs font-medium text-gray-600 cursor-pointer select-none">Remember me for 30 days</label>
+          <label htmlFor="remember" className="text-xs font-medium text-gray-600 cursor-pointer select-none">Remember me for 3 days</label>
         </div>
 
         <button 
