@@ -1,7 +1,9 @@
 "use client";
 
-import { ImageIcon, X, ShoppingCart, Package, ChevronRight, AlertTriangle, Sparkles } from "lucide-react";
+import { ImageIcon, X, ShoppingCart, Package, ChevronRight, AlertTriangle, Sparkles, Crown } from "lucide-react";
 import ImageWithSkeleton from "@/components/ui/ImageWithSkeleton";
+import { useBestSellerStore } from "@/store/useBestSellerStore";
+import { useEffect } from "react";
 
 import { Category, Product, ProductGridProps } from "@/types";
 import { useProductGrid } from "@/hooks/useProductGrid";
@@ -21,6 +23,12 @@ export default function ProductGrid({ products, categories = [], selectedCategor
     hasImage,
     getImageUrl
   } = useProductGrid(products, selectedCategoryId, searchQuery);
+
+  const { bestSellerIds, fetchBestSellers } = useBestSellerStore();
+
+  useEffect(() => {
+    fetchBestSellers();
+  }, [fetchBestSellers]);
 
   return (
     <>
@@ -65,6 +73,7 @@ export default function ProductGrid({ products, categories = [], selectedCategor
             const isNew = prod.created_at ? (Date.now() - new Date(prod.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000 : false;
             const isNotActive = prod.status !== "active";
             const isDisabled = isAdded || outOfStock || isNotActive;
+            const isBestSeller = bestSellerIds.includes(String(prod.id));
 
             return (
               <div key={prod.id} className="flex flex-col group">
@@ -93,8 +102,13 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                     </div>
                   )}
                   {/* Product Badges */}
-                  {!isAdded && (isNew || isLowStock) && (
+                  {!isAdded && (isNew || isLowStock || isBestSeller) && (
                     <div className="absolute top-2 left-2 flex flex-col gap-1">
+                      {isBestSeller && (
+                        <div className="bg-gradient-to-r from-amber-500 to-yellow-400 text-white text-[8px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm w-fit">
+                          <Crown className="w-2.5 h-2.5" /> Best Seller
+                        </div>
+                      )}
                       {isNew && (
                         <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-[8px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm w-fit">
                           <Sparkles className="w-2.5 h-2.5" /> New

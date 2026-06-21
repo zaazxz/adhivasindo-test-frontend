@@ -57,3 +57,9 @@ export interface ProductGridProps {
   onCategoryChange?: (id: string | null) => void;
   searchQuery?: string;
 }
+
+export interface BestSellerItem {
+  id: string;
+  name: string;
+  sold: number;
+}

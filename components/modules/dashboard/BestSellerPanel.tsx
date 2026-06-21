@@ -3,82 +3,31 @@
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { toast } from "@/store/useToastStore";
-import { orderService } from "@/services/order.service";
+import { useBestSellerStore } from "@/store/useBestSellerStore";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
 
-interface BestSellerItem {
-  name: string;
-  sold: number;
-  color: string;
-}
-
 export default function BestSellerPanel() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [bestSellers, setBestSellers] = useState<BestSellerItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { bestSellers, isLoading, fetchBestSellers } = useBestSellerStore();
 
   useEffect(() => {
     fetchBestSellers();
-  }, []);
-
-  const fetchBestSellers = async () => {
-    try {
-      setIsLoading(true);
-      const res = await orderService.getAll();
-      const rawOrders = res.data?.data || res.data || res || [];
-      const orders = Array.isArray(rawOrders) ? rawOrders : [];
-
-      // Aggregate sold quantities per product from order items
-      const productSales: Record<string, { name: string; sold: number }> = {};
-
-      // Filter only paid/completed orders
-      const paidOrders = orders.filter((o: any) => {
-        const s = (o.status || "").toLowerCase();
-        return ["paid", "completed"].includes(s);
-      });
-
-      paidOrders.forEach((order: any) => {
-        const orderItems = order.items || order.order_details || [];
-        if (Array.isArray(orderItems)) {
-          orderItems.forEach((item: any) => {
-            const productName = item.product?.name || item.name || `Product #${item.product_id}`;
-            const key = item.product_id || productName;
-            if (!productSales[key]) {
-              productSales[key] = { name: productName, sold: 0 };
-            }
-            productSales[key].sold += item.quantity || item.qty || 0;
-          });
-        }
-      });
-
-      // Sort by most sold and take top 3
-      const sorted = Object.values(productSales)
-        .sort((a, b) => b.sold - a.sold)
-        .slice(0, 3)
-        .map((item, i) => ({
-          ...item,
-          color: COLORS[i % COLORS.length],
-        }));
-
-      setBestSellers(sorted);
-    } catch (error) {
-      console.error("Failed to fetch best sellers:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [fetchBestSellers]);
 
   // Compute chart data from best sellers
   const totalSold = bestSellers.reduce((sum, item) => sum + item.sold, 0);
-  const chartData = bestSellers.map((item) => ({
+  const chartData = bestSellers.map((item, i) => ({
     name: item.name,
     value: totalSold > 0 ? Math.round((item.sold / totalSold) * 100) : 0,
-    color: item.color,
+    color: COLORS[i % COLORS.length],
   }));
 
   // Top 3 for the bottom section
-  const topProducts = bestSellers.slice(0, 3);
+  const topProducts = bestSellers.slice(0, 3).map((item, i) => ({
+    ...item,
+    color: COLORS[i % COLORS.length],
+  }));
 
   return (
     <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-5 flex flex-col h-auto lg:h-[340px]">

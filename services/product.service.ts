@@ -6,6 +6,11 @@ export const productService = {
     return response.data;
   },
 
+  getBestSellers: async (limit: number = 3) => {
+    const response = await api.get("/products/best-sellers", { params: { limit } });
+    return response.data;
+  },
+
   getById: async (id: string) => {
     const response = await api.get(`/products/${id}`);
     return response.data;
