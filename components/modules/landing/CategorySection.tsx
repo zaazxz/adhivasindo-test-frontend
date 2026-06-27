@@ -1,14 +1,21 @@
 "use client";
 
-import { ImageIcon } from "lucide-react";
-import { Category, CategorySectionProps } from "@/types";
+import { useState } from "react";
+import { ImageIcon, ChevronDown, ChevronUp } from "lucide-react";
+import { CategorySectionProps } from "@/types";
 
 export default function CategorySection({ categories, selectedId, onSelect }: CategorySectionProps) {
+  const [showAll, setShowAll] = useState(false);
+  const maxInitial = 5;
+  
+  const hasMore = categories.length > maxInitial;
+  const visibleCategories = (showAll || !hasMore) ? categories : categories.slice(0, maxInitial - 1);
+
   return (
     <section className="mb-16">
       <h2 className="text-xl font-bold mb-6 text-gray-800">Category</h2>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
-        {categories.map((cat) => {
+        {visibleCategories.map((cat) => {
           const isActive = selectedId === cat.id;
           return (
             <div
@@ -35,6 +42,25 @@ export default function CategorySection({ categories, selectedId, onSelect }: Ca
             </div>
           );
         })}
+
+        {hasMore && (
+          <div
+            onClick={() => setShowAll(!showAll)}
+            className="flex flex-col items-center justify-center py-8 px-6 bg-gray-50 border border-gray-100 rounded-xl cursor-pointer transition-all duration-300 select-none hover:bg-gray-100 hover:shadow-md"
+          >
+            {showAll ? (
+              <>
+                <ChevronUp className="w-8 h-8 mb-4 text-gray-400" strokeWidth={1.2} />
+                <span className="text-[13px] font-bold text-gray-700">Show Less</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-8 h-8 mb-4 text-gray-400" strokeWidth={1.2} />
+                <span className="text-[13px] font-bold text-gray-700">See More</span>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

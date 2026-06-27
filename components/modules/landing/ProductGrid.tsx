@@ -39,39 +39,14 @@ export default function ProductGrid({ products, categories = [], selectedCategor
   return (
     <>
       <section>
-        <div className="flex justify-between items-end mb-8 flex-wrap gap-4">
+        <div className="flex justify-between items-end mb-6 flex-wrap gap-4">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Products</h2>
             {searchQuery && (
               <p className="text-sm text-gray-500 mt-1">Showing results for "{searchQuery}"</p>
             )}
           </div>
-          <div className="flex gap-4 md:gap-6 text-[10px] font-bold tracking-[1px] text-gray-400 uppercase flex-wrap">
-            <button
-              onClick={() => onCategoryChange?.(null)}
-              className={`transition-colors pb-2 px-1 cursor-pointer ${!activeFilter
-                  ? "text-[#f59e0b] border-b-[3px] border-[#f59e0b]"
-                  : "hover:text-gray-600 border-b-[3px] border-transparent"
-                }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id || cat.name}
-                onClick={() => onCategoryChange?.(cat.id || null)}
-                className={`transition-colors pb-2 px-1 cursor-pointer ${activeFilter === cat.id
-                    ? "text-[#f59e0b] border-b-[3px] border-[#f59e0b]"
-                    : "hover:text-gray-600 border-b-[3px] border-transparent"
-                  }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        <div className="flex justify-end mb-6">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Sort by:</span>
             <select
