@@ -116,8 +116,14 @@ export function useMasterBarang() {
       }
 
       if (editingId) {
-        await productService.update(editingId, formData);
-        toast.success("Barang berhasil diperbarui!");
+        const response = await productService.update(editingId, formData);
+        const updatedData = response?.data?.data || response?.data;
+        
+        if (updatedData?.status === 'draft' && status !== 'draft') {
+          toast.info("Barang diperbarui. Status diubah menjadi Draft oleh sistem.");
+        } else {
+          toast.success("Barang berhasil diperbarui!");
+        }
       } else {
         await productService.create(formData);
         toast.success("Barang berhasil ditambahkan!");

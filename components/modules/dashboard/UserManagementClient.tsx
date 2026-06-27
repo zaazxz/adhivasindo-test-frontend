@@ -4,15 +4,8 @@ import { useState, useEffect } from "react";
 import { userService } from "@/services/user.service";
 import { toast } from "@/store/useToastStore";
 import { FiEdit2, FiTrash2, FiPlus, FiX, FiSearch, FiShield, FiUser } from "react-icons/fi";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  created_at?: string;
-  [key: string]: any;
-}
+import { User } from "@/types";
+import { FORMAT_DATE_SHORT } from "@/constants";
 
 export default function UserManagementClient() {
   const [users, setUsers] = useState<User[]>([]);
@@ -138,15 +131,6 @@ export default function UserManagementClient() {
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   return (
     <>
       <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 relative">
@@ -220,7 +204,7 @@ export default function UserManagementClient() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-gray-500 text-[12px]">
-                      {formatDate(user.created_at)}
+                      {user.created_at ? FORMAT_DATE_SHORT(user.created_at) : "-"}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">

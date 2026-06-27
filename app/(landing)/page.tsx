@@ -1,11 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import CategorySection from "@/components/modules/landing/CategorySection";
 import ProductGrid from "@/components/modules/landing/ProductGrid";
 import { useSearchParams } from "next/navigation";
 import { useLandingPage } from "@/hooks/useLandingPage";
 
-export default function LandingPage() {
+function LandingPageContent() {
   const searchParams = useSearchParams();
   const searchQ = searchParams.get("search") || "";
 
@@ -68,5 +69,13 @@ export default function LandingPage() {
         searchQuery={searchQ}
       />
     </>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense>
+      <LandingPageContent />
+    </Suspense>
   );
 }

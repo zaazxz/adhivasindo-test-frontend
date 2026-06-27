@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "@/store/useToastStore";
 import { productService } from "@/services/product.service";
 import { useStoreSettingsStore } from "@/store/useStoreSettingsStore";
+import { FORMAT_RUPIAH } from "@/constants";
 
 export default function Header() {
   const router = useRouter();
@@ -220,7 +221,7 @@ export default function Header() {
                 Your Cart
               </div>
               <div className="text-[13px] font-bold group-hover:text-[#f59e0b] transition-colors">
-                {isLoggedIn ? formatRupiah(getTotalPrice()) : "Sign in"}
+                {isLoggedIn ? FORMAT_RUPIAH(getTotalPrice()) : "Sign in"}
               </div>
             </div>
           </button>
@@ -321,6 +322,3 @@ export default function Header() {
     </header>
   );
 }
-
-const formatRupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);

@@ -4,42 +4,8 @@ import { useState, useEffect } from "react";
 import { orderService } from "@/services/order.service";
 import { toast } from "@/store/useToastStore";
 import { FiSearch, FiChevronLeft, FiChevronRight, FiArrowDown, FiArrowUp, FiX, FiCheck, FiXCircle, FiEye } from "react-icons/fi";
-
-interface OrderItem {
-  id: string;
-  product_id: string;
-  quantity: number;
-  qty?: number;
-  price: number;
-  product?: {
-    name: string;
-    image_url?: string;
-    price?: number;
-  };
-}
-
-interface Order {
-  id: string;
-  order_no?: string;
-  invoice_number?: string;
-  total_price?: number;
-  total_amount?: number;
-  total?: number;
-  status: string;
-  payment_method?: string;
-  customer_name?: string;
-  name?: string;
-  created_at: string;
-  user?: {
-    name: string;
-    email?: string;
-  };
-  customer?: {
-    name: string;
-  };
-  items?: OrderItem[];
-  order_details?: OrderItem[];
-}
+import { FORMAT_RUPIAH, FORMAT_DATE_TIME, ITEMS_PER_PAGE_TRANSAKSI } from "@/constants";
+import { Order, OrderItem } from "@/types";
 
 export default function RiwayatTransaksiClient() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -49,7 +15,7 @@ export default function RiwayatTransaksiClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = ITEMS_PER_PAGE_TRANSAKSI;
 
   // Modal states
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -87,17 +53,6 @@ export default function RiwayatTransaksiClient() {
     } finally {
       setIsUpdating(false);
     }
-  };
-
-  const formatRupiah = (number: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number);
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "-";
-    const dtStr = dateString.endsWith("Z") ? dateString : dateString.replace(" ", "T") + "Z";
-    return new Date(dtStr).toLocaleDateString("id-ID", {
-      day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta"
-    });
   };
 
   const getCustomerName = (order: any) => {
@@ -220,9 +175,9 @@ export default function RiwayatTransaksiClient() {
                     <td className="py-3 px-3 font-bold text-[#3b63f6] text-[12px]">
                       {order.order_no || order.invoice_number || `#${String(order.id).substring(0, 8).toUpperCase()}`}
                     </td>
-                    <td className="py-3 px-3 text-gray-500 text-[12px]">{formatDate(order.created_at)}</td>
+                    <td className="py-3 px-3 text-gray-500 text-[12px]">{FORMAT_DATE_TIME(order.created_at)}</td>
                     <td className="py-3 px-3 font-medium text-[12px]">{getCustomerName(order)}</td>
-                    <td className="py-3 px-3 font-bold text-gray-900 text-[12px]">{formatRupiah(getTotal(order))}</td>
+                    <td className="py-3 px-3 font-bold text-gray-900 text-[12px]">{FORMAT_RUPIAH(getTotal(order))}</td>
                     <td className="py-3 px-3">
                       <span className={`py-1 px-2.5 rounded-md text-[10px] font-bold ${badge.cls}`}>{badge.label}</span>
                     </td>
@@ -301,7 +256,7 @@ export default function RiwayatTransaksiClient() {
                 </div>
                 <div>
                   <div className="text-[10px] font-bold text-gray-400 uppercase">Tanggal</div>
-                  <div className="text-[13px] text-gray-700">{formatDate(selectedOrder.created_at)}</div>
+                  <div className="text-[13px] text-gray-700">{FORMAT_DATE_TIME(selectedOrder.created_at)}</div>
                 </div>
                 <div>
                   <div className="text-[10px] font-bold text-gray-400 uppercase">Pembayaran</div>
@@ -309,7 +264,7 @@ export default function RiwayatTransaksiClient() {
                 </div>
                 <div>
                   <div className="text-[10px] font-bold text-gray-400 uppercase">Total</div>
-                  <div className="text-[16px] font-extrabold text-gray-800">{formatRupiah(getTotal(selectedOrder))}</div>
+                  <div className="text-[16px] font-extrabold text-gray-800">{FORMAT_RUPIAH(getTotal(selectedOrder))}</div>
                 </div>
               </div>
 
@@ -319,10 +274,10 @@ export default function RiwayatTransaksiClient() {
                   <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
                     <div>
                       <div className="text-[13px] font-bold text-gray-800">{item.product?.name || `Product #${item.product_id}`}</div>
-                      <div className="text-[11px] text-gray-400">{formatRupiah(item.price || item.product?.price || 0)} × {item.quantity || item.qty || 1}</div>
+                      <div className="text-[11px] text-gray-400">{FORMAT_RUPIAH(item.price || item.product?.price || 0)} × {item.quantity || item.qty || 1}</div>
                     </div>
                     <div className="text-[13px] font-extrabold text-gray-800">
-                      {formatRupiah(Number(item.price || item.product?.price || 0) * (item.quantity || item.qty || 1))}
+                      {FORMAT_RUPIAH(Number(item.price || item.product?.price || 0) * (item.quantity || item.qty || 1))}
                     </div>
                   </div>
                 ))}

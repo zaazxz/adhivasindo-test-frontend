@@ -11,15 +11,7 @@ import { toast } from "@/store/useToastStore";
 import { orderService } from "@/services/order.service";
 import { productService } from "@/services/product.service";
 import Link from "next/link";
-
-interface Notification {
-  id: number;
-  title: string;
-  desc: string;
-  time: string;
-  read: boolean;
-  link?: string;
-}
+import { Notification } from "@/types";
 
 const searchablePages = [
   { name: "Dashboard Overview", path: "/dashboard", icon: "FiHome" },

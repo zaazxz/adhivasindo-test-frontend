@@ -42,9 +42,9 @@ export default function BestSellerPanel() {
             ))}
           </div>
         </div>
-      ) : chartData.length === 0 ? (
+      ) : totalSold === 0 ? (
         <div className="flex-1 flex items-center justify-center text-gray-400 text-[12px]">
-          No sales data yet.
+          Belum ada data penjualan.
         </div>
       ) : (
         <>

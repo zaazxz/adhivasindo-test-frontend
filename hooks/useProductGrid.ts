@@ -4,7 +4,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "@/store/useToastStore";
 
-export function useProductGrid(products: Product[], selectedCategoryId?: string | null, searchQuery?: string) {
+export function useProductGrid(products: Product[], selectedCategoryId?: string | null, searchQuery?: string, bestSellerIds: string[] = []) {
   const { addItem } = useCartStore();
   const user = useAuthStore((state) => state.user);
   const isLoggedIn = !!user;
@@ -12,6 +12,10 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
   const [quantities, setQuantities] = useState<Record<string, number | string>>({});
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  const [sortMethod, setSortMethod] = useState("new");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const getQty = (id: number | string): number | string => quantities[String(id)] ?? 1;
 
@@ -58,6 +62,27 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
     return inStock && matchesCategory && matchesSearch;
   });
 
+  const sorted = [...filtered].sort((a, b) => {
+    switch(sortMethod) {
+      case "old":
+        return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+      case "price-asc":
+        return Number(a.price) - Number(b.price);
+      case "price-desc":
+        return Number(b.price) - Number(a.price);
+      case "best-seller":
+        const aBest = bestSellerIds.includes(String(a.id)) ? 1 : 0;
+        const bBest = bestSellerIds.includes(String(b.id)) ? 1 : 0;
+        return bBest - aBest;
+      case "new":
+      default:
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    }
+  });
+
+  const totalPages = Math.ceil(sorted.length / itemsPerPage);
+  const paginated = sorted.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const relatedProducts = selectedProduct
     ? products
         .filter((p) => {
@@ -85,6 +110,12 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
     handleAddToCart,
     activeFilter,
     filtered,
+    paginated,
+    sortMethod,
+    setSortMethod,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     relatedProducts,
     hasImage,
     getImageUrl

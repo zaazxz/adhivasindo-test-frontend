@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { orderService } from "@/services/order.service";
 import Link from "next/link";
 import { FiArrowRight } from "react-icons/fi";
+import { FORMAT_RUPIAH, FORMAT_DATE_TIME } from "@/constants";
 
 export default function RecentTransactionsPanel() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -24,9 +25,6 @@ export default function RecentTransactionsPanel() {
     };
     fetchOrders();
   }, []);
-
-  const formatRupiah = (number: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number);
 
   const getStatusBadge = (status: string) => {
     const s = (status || "").toLowerCase();
@@ -80,10 +78,10 @@ export default function RecentTransactionsPanel() {
                       {order.order_no || order.invoice_number || `#${String(order.id).substring(0, 8).toUpperCase()}`}
                     </td>
                     <td className="py-3 px-3 text-gray-500 text-[12px]">
-                      {(() => { const d = order.created_at; const dt = d?.endsWith?.("Z") ? d : (d || "").replace(" ", "T") + "Z"; return new Date(dt).toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }); })()}
+                      {FORMAT_DATE_TIME(order.created_at)}
                     </td>
                     <td className="py-3 px-3 font-medium text-[12px]">{order.user?.name || order.customer?.name || order.customer_name || order.name || "Tanpa Nama"}</td>
-                    <td className="py-3 px-3 font-bold text-gray-900 text-[12px]">{formatRupiah(getTotal(order))}</td>
+                    <td className="py-3 px-3 font-bold text-gray-900 text-[12px]">{FORMAT_RUPIAH(getTotal(order))}</td>
                     <td className="py-3 px-3 text-right">
                       <span className={`py-1 px-2.5 rounded-md text-[9px] font-bold ${badge.cls}`}>{badge.label}</span>
                     </td>

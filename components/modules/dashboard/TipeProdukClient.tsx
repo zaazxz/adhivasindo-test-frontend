@@ -4,13 +4,8 @@ import { useState, useEffect } from "react";
 import { productTypeService } from "@/services/product-type.service";
 import { FiEdit2, FiTrash2, FiPlus, FiX, FiSearch, FiChevronLeft, FiChevronRight, FiArrowDown, FiArrowUp } from "react-icons/fi";
 import { toast } from "@/store/useToastStore";
-
-interface ProductType {
-  id: string;
-  name?: string;
-  type_name?: string;
-  products_count?: number; // assuming backend returns this or we just hide it
-}
+import { ProductType } from "@/types";
+import { ITEMS_PER_PAGE_DEFAULT } from "@/constants";
 
 export default function TipeProdukClient() {
   const [types, setTypes] = useState<ProductType[]>([]);
@@ -25,7 +20,7 @@ export default function TipeProdukClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = ITEMS_PER_PAGE_DEFAULT;
 
   useEffect(() => {
     fetchTypes();

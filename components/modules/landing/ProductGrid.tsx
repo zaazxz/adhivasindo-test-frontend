@@ -10,6 +10,8 @@ import { useProductGrid } from "@/hooks/useProductGrid";
 import { FORMAT_RUPIAH } from "@/constants";
 
 export default function ProductGrid({ products, categories = [], selectedCategoryId, onCategoryChange, searchQuery = "" }: ProductGridProps) {
+  const { bestSellerIds, fetchBestSellers } = useBestSellerStore();
+
   const {
     addedIds,
     selectedProduct,
@@ -19,12 +21,16 @@ export default function ProductGrid({ products, categories = [], selectedCategor
     handleAddToCart,
     activeFilter,
     filtered,
+    paginated,
+    sortMethod,
+    setSortMethod,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     relatedProducts,
     hasImage,
     getImageUrl
-  } = useProductGrid(products, selectedCategoryId, searchQuery);
-
-  const { bestSellerIds, fetchBestSellers } = useBestSellerStore();
+  } = useProductGrid(products, selectedCategoryId, searchQuery, bestSellerIds);
 
   useEffect(() => {
     fetchBestSellers();
@@ -65,8 +71,28 @@ export default function ProductGrid({ products, categories = [], selectedCategor
           </div>
         </div>
 
+        <div className="flex justify-end mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Sort by:</span>
+            <select
+              value={sortMethod}
+              onChange={(e) => {
+                setSortMethod(e.target.value);
+                setCurrentPage(1); // reset to page 1 on sort
+              }}
+              className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg px-3 py-1.5 outline-none focus:border-[#f59e0b] focus:ring-2 focus:ring-amber-50 cursor-pointer"
+            >
+              <option value="new">Terbaru</option>
+              <option value="old">Terlama</option>
+              <option value="best-seller">Best Seller</option>
+              <option value="price-asc">Harga Termurah</option>
+              <option value="price-desc">Harga Termahal</option>
+            </select>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-x-5 gap-y-8">
-          {filtered.map((prod) => {
+          {paginated.map((prod) => {
             const isAdded = addedIds.has(String(prod.id));
             const outOfStock = (prod.stock ?? 0) <= 0;
             const isLowStock = (prod.stock ?? 0) > 0 && (prod.stock ?? 0) <= 5;
@@ -176,9 +202,44 @@ export default function ProductGrid({ products, categories = [], selectedCategor
           })}
         </div>
 
-        {filtered.length === 0 && (
+        {paginated.length === 0 && (
           <div className="text-center py-16 text-gray-400 text-sm">
             No products found in this category.
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-12 px-4 py-3 bg-gray-50/50 rounded-xl border border-gray-100">
+            <span className="text-xs text-gray-500">
+              Menampilkan <span className="font-bold text-gray-800">{((currentPage - 1) * 10) + 1}</span> - <span className="font-bold text-gray-800">{Math.min(currentPage * 10, filtered.length)}</span> dari <span className="font-bold text-gray-800">{filtered.length}</span> produk
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-1.5 rounded-md border border-gray-200 text-gray-500 hover:bg-white disabled:opacity-50 transition-colors cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4 rotate-180" />
+              </button>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-7 h-7 rounded-md text-xs font-bold transition-colors cursor-pointer ${currentPage === i + 1 ? "bg-[#f59e0b] text-white border-transparent" : "border border-gray-200 text-gray-600 hover:bg-white"
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1.5 rounded-md border border-gray-200 text-gray-500 hover:bg-white disabled:opacity-50 transition-colors cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
       </section>

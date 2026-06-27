@@ -5,14 +5,12 @@ import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import { FiTrendingDown, FiTrendingUp } from "react-icons/fi";
 import { orderService } from "@/services/order.service";
 import { productService } from "@/services/product.service";
+import { FORMAT_RUPIAH } from "@/constants";
 
 type Period = "monthly" | "weekly";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const formatRupiah = (number: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number);
 
 export default function SalesChartPanel() {
   const [period, setPeriod] = useState<Period>("monthly");
@@ -143,7 +141,7 @@ export default function SalesChartPanel() {
                 <YAxis hide />
                 <Tooltip
                   contentStyle={{ backgroundColor: "#1e3a8a", border: "none", borderRadius: "8px", fontSize: "11px", color: "#fff" }}
-                  formatter={(value: any) => [formatRupiah(Number(value)), "Revenue"]}
+                  formatter={(value: any) => [FORMAT_RUPIAH(Number(value)), "Revenue"]}
                   labelStyle={{ color: "rgba(255,255,255,0.7)", fontSize: "10px" }}
                 />
                 <Line type="monotone" dataKey="value" stroke="#ffffff" strokeWidth={2} dot={{ fill: "#fff", r: 3, strokeWidth: 0 }} activeDot={{ fill: "#fbbf24", r: 5, strokeWidth: 2, stroke: "#fff" }} />
@@ -155,7 +153,7 @@ export default function SalesChartPanel() {
       <div className="p-5 flex flex-col flex-1">
         <div className="flex justify-between items-center px-4">
           <div className="text-center">
-            <div className="text-xl font-bold text-gray-800">{isLoading ? "..." : formatRupiah(avg)}</div>
+            <div className="text-xl font-bold text-gray-800">{isLoading ? "..." : FORMAT_RUPIAH(avg)}</div>
             <div className="text-[10px] font-semibold text-gray-400 mt-0.5">Rata-rata</div>
           </div>
           <div className="text-center">

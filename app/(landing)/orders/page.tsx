@@ -6,6 +6,7 @@ import { orderService } from "@/services/order.service";
 import { toast } from "@/store/useToastStore";
 import Link from "next/link";
 import { ImageIcon } from "lucide-react";
+import { FORMAT_RUPIAH, FORMAT_DATE } from "@/constants";
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -48,19 +49,6 @@ export default function OrderHistoryPage() {
     }
   };
 
-  const formatRupiah = (n: number | string) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(n) || 0);
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "-";
-    const dtStr = dateString.endsWith("Z") ? dateString : dateString.replace(" ", "T") + "Z";
-    return new Date(dtStr).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      timeZone: "Asia/Jakarta"
-    });
-  };
 
   const getStatusDisplay = (status: string) => {
     const s = (status || "").toLowerCase();
@@ -111,11 +99,11 @@ export default function OrderHistoryPage() {
                   <div className="flex items-center gap-6">
                     <div>
                       <div className="text-[10px] font-bold text-gray-400 uppercase">Order Placed</div>
-                      <div className="text-xs font-bold text-gray-700">{formatDate(order.created_at)}</div>
+                      <div className="text-xs font-bold text-gray-700">{FORMAT_DATE(order.created_at)}</div>
                     </div>
                     <div>
                       <div className="text-[10px] font-bold text-gray-400 uppercase">Total</div>
-                      <div className="text-xs font-bold text-gray-700">{formatRupiah(total)}</div>
+                      <div className="text-xs font-bold text-gray-700">{FORMAT_RUPIAH(total)}</div>
                     </div>
                   </div>
                   <div className="text-right">

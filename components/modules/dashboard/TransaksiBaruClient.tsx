@@ -6,23 +6,12 @@ import { orderService } from "@/services/order.service";
 import { toast } from "@/store/useToastStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { FiPlus, FiMinus, FiTrash2, FiSearch, FiImage } from "react-icons/fi";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  image_url: string | null;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
+import { FORMAT_RUPIAH } from "@/constants";
+import { Product, KasirCartItem } from "@/types";
 
 export default function TransaksiBaruClient() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<KasirCartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +42,7 @@ export default function TransaksiBaruClient() {
   }, [products, searchQuery]);
 
   const addToCart = (product: Product) => {
-    if (product.stock <= 0) {
+    if ((product.stock ?? 0) <= 0) {
       toast.error("Stok barang habis!");
       return;
     }
@@ -71,11 +60,11 @@ export default function TransaksiBaruClient() {
             : item
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity: 1 } as KasirCartItem];
     });
   };
 
-    const updateQuantity = (productId: string, delta: number | string, isAbsolute: boolean = false) => {
+    const updateQuantity = (productId: number | string, delta: number | string, isAbsolute: boolean = false) => {
     setCart((prev) => {
       return prev.map((item) => {
         if (item.product.id === productId) {
@@ -100,7 +89,7 @@ export default function TransaksiBaruClient() {
     });
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = (productId: number | string) => {
     setCart((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
@@ -116,7 +105,7 @@ export default function TransaksiBaruClient() {
         payment_method: "cash",
         customer_name: user?.name || "Admin Kasir",
         items: cart.map(item => ({
-          product_id: item.product.id,
+          product_id: String(item.product.id),
           quantity: item.quantity
         }))
       };
@@ -134,10 +123,6 @@ export default function TransaksiBaruClient() {
   };
 
   const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-
-  const formatRupiah = (number: number) => {
-    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number);
-  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full">
@@ -182,10 +167,10 @@ export default function TransaksiBaruClient() {
                     )}
                   </div>
                   <div className="text-[12px] font-bold text-gray-700 text-center w-full truncate leading-tight">{product.name}</div>
-                  <div className="text-[11px] font-extrabold text-[#3b63f6] mt-1">{formatRupiah(product.price)}</div>
-                  <div className="text-[9px] font-semibold text-gray-400 mt-1.5">Stok: {product.stock}</div>
+                  <div className="text-[11px] font-extrabold text-[#3b63f6] mt-1">{FORMAT_RUPIAH(product.price)}</div>
+                  <div className="text-[9px] font-semibold text-gray-400 mt-1.5">Stok: {product.stock ?? 0}</div>
                   
-                  {product.stock <= 0 && (
+                  {(product.stock ?? 0) <= 0 && (
                     <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] rounded-xl flex items-center justify-center">
                       <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-md transform -rotate-12">HABIS</span>
                     </div>
@@ -215,10 +200,10 @@ export default function TransaksiBaruClient() {
                 <div className="flex justify-between items-start mb-2">
                   <div className="pr-2">
                     <div className="text-[12px] font-bold text-gray-800 leading-tight">{item.product.name}</div>
-                    <div className="text-[11px] font-medium text-[#3b63f6] mt-0.5">{formatRupiah(item.product.price)}</div>
+                    <div className="text-[11px] font-medium text-[#3b63f6] mt-0.5">{FORMAT_RUPIAH(item.product.price)}</div>
                   </div>
                   <div className="text-[12px] font-extrabold text-gray-800 shrink-0">
-                    {formatRupiah(item.product.price * item.quantity)}
+                    {FORMAT_RUPIAH(item.product.price * item.quantity)}
                   </div>
                 </div>
                 
@@ -255,7 +240,7 @@ export default function TransaksiBaruClient() {
         <div className="pt-4 border-t border-gray-100 mt-auto shrink-0 bg-white">
           <div className="flex justify-between items-center mb-4">
             <span className="text-[13px] font-bold text-gray-500">Total Pembayaran</span>
-            <span className="text-[20px] font-extrabold text-[#3b63f6]">{formatRupiah(total)}</span>
+            <span className="text-[20px] font-extrabold text-[#3b63f6]">{FORMAT_RUPIAH(total)}</span>
           </div>
           <button 
             onClick={handleCheckout}

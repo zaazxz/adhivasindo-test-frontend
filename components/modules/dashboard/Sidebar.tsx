@@ -9,25 +9,7 @@ import {
 import { FiHome, FiBox, FiShoppingCart, FiSettings, FiShoppingBag } from "react-icons/fi";
 import type { IconType } from "react-icons";
 import { useSidebarStore } from "@/store/useSidebarStore";
-
-interface NavSubItem {
-  label: string;
-  href: string;
-}
-
-interface NavItem {
-  label: string;
-  href?: string;
-  icon: IconType;
-  hasArrow?: boolean;
-  subItems?: NavSubItem[];
-}
-
-interface NavGroup {
-  section: string | null;
-  sectionSub?: string;
-  items: NavItem[];
-}
+import { NavSubItem, NavItem, NavGroup } from "@/types";
 
 const navItems: NavGroup[] = [
   {

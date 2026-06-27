@@ -6,17 +6,8 @@ import { AiOutlineDollarCircle } from "react-icons/ai";
 import { productService } from "@/services/product.service";
 import { productTypeService } from "@/services/product-type.service";
 import { orderService } from "@/services/order.service";
-
-interface StatCardProps {
-  value: string;
-  label: string;
-  valueColor: string;
-  bottomColor: string;
-  bgColor: string;
-  icon: React.ReactNode;
-  detail: { title: string; items: { label: string; value: string }[] };
-  isLoading?: boolean;
-}
+import { FORMAT_RUPIAH } from "@/constants";
+import { StatCardProps } from "@/types";
 
 function StatCard({ value, label, valueColor, bottomColor, bgColor, icon, detail, isLoading }: StatCardProps) {
   const [showDetail, setShowDetail] = useState(false);
@@ -75,9 +66,6 @@ function StatCard({ value, label, valueColor, bottomColor, bgColor, icon, detail
     </>
   );
 }
-
-const formatRupiah = (number: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number);
 
 export default function StatCards() {
   const [isLoading, setIsLoading] = useState(true);
@@ -146,7 +134,7 @@ export default function StatCards() {
 
   const cards: StatCardProps[] = [
     {
-      value: formatRupiah(totalRevenue),
+      value: FORMAT_RUPIAH(totalRevenue),
       label: "Total Semua Pendapatan",
       valueColor: "text-[#f59e0b]",
       bottomColor: "bg-[#f59e0b]",
@@ -160,7 +148,7 @@ export default function StatCards() {
         title: "Revenue Breakdown",
         items: [
           { label: "Valid Orders (Paid/Completed)", value: `${orders.filter((o:any) => ["paid", "completed"].includes((o.status || "").toLowerCase())).length} orders` },
-          { label: "Total Revenue", value: formatRupiah(totalRevenue) },
+          { label: "Total Revenue", value: FORMAT_RUPIAH(totalRevenue) },
         ],
       },
     },

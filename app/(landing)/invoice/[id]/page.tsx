@@ -5,6 +5,7 @@ import { FiCheckCircle, FiDownload, FiArrowLeft } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { orderService } from "@/services/order.service";
+import { FORMAT_RUPIAH, FORMAT_DATE } from "@/constants";
 
 export default function InvoicePage() {
   const { id } = useParams();
@@ -29,22 +30,6 @@ export default function InvoicePage() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const formatRupiah = (n: number | string) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(n) || 0);
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "-";
-    const dtStr = dateString.endsWith("Z") ? dateString : dateString.replace(" ", "T") + "Z";
-    return new Date(dtStr).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Asia/Jakarta"
-    });
   };
 
   if (isLoading) {
@@ -93,7 +78,7 @@ export default function InvoicePage() {
             </div>
             <div className="text-right">
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Date</div>
-              <div className="text-sm font-bold text-gray-800">{formatDate(order.created_at)}</div>
+              <div className="text-sm font-bold text-gray-800">{FORMAT_DATE(order.created_at, { hour: "2-digit", minute: "2-digit" })}</div>
             </div>
           </div>
           
@@ -116,8 +101,8 @@ export default function InvoicePage() {
                     <tr key={idx} className="border-b border-gray-50">
                       <td className="py-3 font-semibold">{name}</td>
                       <td className="py-3 text-center">{qty}</td>
-                      <td className="py-3 text-right">{formatRupiah(price)}</td>
-                      <td className="py-3 text-right font-bold">{formatRupiah(price * qty)}</td>
+                      <td className="py-3 text-right">{FORMAT_RUPIAH(price)}</td>
+                      <td className="py-3 text-right font-bold">{FORMAT_RUPIAH(price * qty)}</td>
                     </tr>
                   );
                 })}
@@ -129,7 +114,7 @@ export default function InvoicePage() {
             <div className="w-72 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Subtotal</span>
-                <span className="font-bold text-gray-800">{formatRupiah(totalPaid)}</span>
+                <span className="font-bold text-gray-800">{FORMAT_RUPIAH(totalPaid)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Shipping</span>
@@ -141,7 +126,7 @@ export default function InvoicePage() {
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                 <span className="text-base font-bold text-gray-800">Total Paid</span>
-                <span className="text-xl font-extrabold text-[#f59e0b]">{formatRupiah(totalPaid)}</span>
+                <span className="text-xl font-extrabold text-[#f59e0b]">{FORMAT_RUPIAH(totalPaid)}</span>
               </div>
             </div>
           </div>

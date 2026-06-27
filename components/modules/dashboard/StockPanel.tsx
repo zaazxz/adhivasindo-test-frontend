@@ -3,13 +3,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "@/store/useToastStore";
 import { productService } from "@/services/product.service";
-
-interface Product {
-  id: string;
-  name: string;
-  stock: number;
-  [key: string]: any;
-}
+import { Product } from "@/types";
 
 export default function StockPanel() {
   const [products, setProducts] = useState<Product[]>([]);

@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FORMAT_RUPIAH } from "@/constants";
 
 export default function CartDrawer() {
   const { isOpen, items, setCartOpen, getTotalPrice, getTotalItems, updateQuantity, removeItem } = useCartStore();
@@ -22,9 +23,6 @@ export default function CartDrawer() {
       router.push("/checkout");
     }, 800);
   };
-
-  const formatRupiah = (n: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
   return (
     <>
@@ -81,7 +79,7 @@ export default function CartDrawer() {
                       <div className="min-w-0">
                         <h4 className="text-[13px] font-bold text-gray-800 truncate">{item.name}</h4>
                         <p className="text-[11px] font-medium text-gray-400 mt-1">
-                          {formatRupiah(Number(item.price))} × {item.quantity}
+                          {FORMAT_RUPIAH(Number(item.price))} × {item.quantity}
                         </p>
                         {/* Quantity controls */}
                         <div className="flex items-center gap-2 mt-2">
@@ -127,7 +125,7 @@ export default function CartDrawer() {
                     </div>
                     <div className="flex flex-col items-end gap-2 ml-3">
                       <span className="text-[13px] font-bold text-gray-700">
-                        {formatRupiah(Number(item.price) * item.quantity)}
+                        {FORMAT_RUPIAH(Number(item.price) * item.quantity)}
                       </span>
                       <button
                         onClick={() => removeItem(item.id)}
@@ -160,7 +158,7 @@ export default function CartDrawer() {
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[11px] font-medium text-gray-400">Subtotal</span>
                 <span className="text-[13px] font-semibold text-gray-500">
-                  {formatRupiah(getTotalPrice())}
+                  {FORMAT_RUPIAH(getTotalPrice())}
                 </span>
               </div>
               <div className="flex justify-between items-center mb-2">
@@ -170,7 +168,7 @@ export default function CartDrawer() {
               <div className="flex justify-between items-center mb-6 pt-3 border-t border-gray-100">
                 <span className="text-[13px] font-bold text-gray-800">Total</span>
                 <span className="text-[15px] font-extrabold text-gray-800">
-                  {formatRupiah(getTotalPrice())}
+                  {FORMAT_RUPIAH(getTotalPrice())}
                 </span>
               </div>
               <button

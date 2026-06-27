@@ -170,7 +170,7 @@ export default function MasterBarangClient() {
                       item.status === 'out-of-stock' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {item.status ? item.status.toUpperCase() : "ACTIVE"}
+                      {item.status ? item.status.replace(/-/g, ' ').toUpperCase() : "ACTIVE"}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right">
@@ -312,12 +312,12 @@ export default function MasterBarangClient() {
                   </select>
                 </div>
 
-                <div className="col-span-1">
+                <div className={!editingId ? "hidden" : "col-span-1"}>
                   <label className="block text-[12px] font-bold text-gray-700 mb-2">Status</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    required
+                    required={!!editingId}
                     className="w-full bg-[#f8f9fa] border border-gray-200 rounded-xl px-4 py-3 text-[13px] font-medium outline-none focus:border-[#3b63f6] focus:ring-4 focus:ring-blue-50 focus:bg-white transition-all cursor-pointer"
                   >
                     <option value="active">Active</option>

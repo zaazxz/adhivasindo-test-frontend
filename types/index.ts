@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import type { ElementType } from "react";
+import type { ElementType, ReactNode } from "react";
 
 export interface Category {
   id?: string;
@@ -37,11 +37,28 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+// Used in Kasir/POS: cart item nests the product object
+export interface KasirCartItem {
+  product: Product;
+  quantity: number;
+}
+
 export interface StatCardData {
   label: string;
   value: string;
   icon: ElementType;
   accent: string;
+}
+
+export interface StatCardProps {
+  value: string;
+  label: string;
+  valueColor: string;
+  bottomColor: string;
+  bgColor: string;
+  icon: ReactNode;
+  detail: { title: string; items: { label: string; value: string }[] };
+  isLoading?: boolean;
 }
 
 export interface CategorySectionProps {
@@ -62,4 +79,76 @@ export interface BestSellerItem {
   id: string;
   name: string;
   sold: number;
+}
+
+export interface OrderItem {
+  id: string;
+  product_id: string;
+  quantity: number;
+  qty?: number;
+  price: number;
+  product?: {
+    name: string;
+    image_url?: string;
+    price?: number;
+  };
+}
+
+export interface Order {
+  id: string;
+  order_no?: string;
+  invoice_number?: string;
+  total_price?: number;
+  total_amount?: number;
+  total?: number;
+  status: string;
+  payment_method?: string;
+  customer_name?: string;
+  name?: string;
+  created_at: string;
+  user?: {
+    name: string;
+    email?: string;
+  };
+  customer?: {
+    name: string;
+  };
+  items?: OrderItem[];
+  order_details?: OrderItem[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  created_at?: string;
+}
+
+export interface Notification {
+  id: number;
+  title: string;
+  desc: string;
+  time: string;
+  read: boolean;
+  link?: string;
+}
+
+export interface NavSubItem {
+  label: string;
+  href: string;
+}
+
+export interface NavItem {
+  label: string;
+  href?: string;
+  icon: ElementType | any;
+  hasArrow?: boolean;
+  subItems?: NavSubItem[];
+}
+
+export interface NavGroup {
+  section: string | null;
+  sectionSub?: string;
+  items: NavItem[];
 }
