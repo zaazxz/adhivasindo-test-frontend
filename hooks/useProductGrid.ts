@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Product } from "@/types";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -16,6 +16,10 @@ export function useProductGrid(products: Product[], selectedCategoryId?: string 
   const [sortMethod, setSortMethod] = useState("new");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategoryId, searchQuery]);
 
   const getQty = (id: number | string): number | string => quantities[String(id)] ?? 1;
 

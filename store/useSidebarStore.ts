@@ -1,10 +1,5 @@
 import { create } from 'zustand';
-
-interface SidebarState {
-  isOpen: boolean;
-  toggle: () => void;
-  setOpen: (open: boolean) => void;
-}
+import { SidebarState } from '@/types';
 
 export const useSidebarStore = create<SidebarState>((set) => ({
   isOpen: typeof window !== 'undefined' ? window.innerWidth >= 768 : true,

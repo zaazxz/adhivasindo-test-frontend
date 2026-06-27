@@ -57,7 +57,8 @@ Follow these instructions to get the project up and running on your local machin
 ## 📝 Features & Usage Tutorial
 
 ### Storefront & Customer Features
-- **Browsing Products:** View all available products directly on the landing page. Use the category filters at the top or the search bar to find specific items.
+- **Browsing Products:** View all available products directly on the landing page with interactive pagination.
+- **Smart Category Filtering:** Dynamically filter products by category. The category section automatically truncates (Show More/Less) for a cleaner UI, and textual tabs are hidden for a streamlined look.
 - **Cart System:** Click "Add to Cart" on any product. A floating shopping cart will store your items persistently using Zustand.
 - **Checkout:** Once you have items in your cart, click the Cart icon to review and click "Checkout" to place an order (requires login).
 - **Customer Profile:** Customers can manage their personal information (Name, Email) via the "My Profile" page.
@@ -66,6 +67,8 @@ Follow these instructions to get the project up and running on your local machin
 ### Admin Dashboard (`/dashboard`)
 To access the dashboard, log in with an administrator account.
 - **Master Barang:** Manage your product catalog. You can add new products, edit descriptions and prices, upload images, and manage stock.
+  - *New Workflow:* Added automated product statuses (`draft`, `active`, `out-of-stock`). New products or restocked empty products automatically go to `draft` first before being manually activated.
+  - *Status Badges:* Products in the landing page show real-time UI badges like `Draft`, `Out of Stock`, `New`, and `Best Seller` (derived directly from real transaction data).
 - **Tipe Produk:** Create and manage product categories.
 - **Riwayat Transaksi:** View a comprehensive list of all customer orders. You can print invoices, change order statuses (e.g., from "Pending" to "Paid"), and track shipments.
 - **Dashboard Analytics:** View real-time statistics, a sales chart, and a Best Seller list based on completed transactions.

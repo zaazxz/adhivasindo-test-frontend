@@ -163,3 +163,58 @@ export interface ChangePasswordPayload {
   password?: string;
   password_confirmation?: string;
 }
+
+// Global Store State Interfaces
+export interface AuthState {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
+
+export interface BestSellerState {
+  bestSellers: BestSellerItem[];
+  bestSellerIds: string[];
+  isLoading: boolean;
+  fetchBestSellers: () => Promise<void>;
+}
+
+export interface CartState {
+  isOpen: boolean;
+  items: CartItem[];
+  toggleCart: () => void;
+  setCartOpen: (open: boolean) => void;
+  addItem: (product: Product, quantity?: number) => void;
+  removeItem: (productId: number | string) => void;
+  updateQuantity: (productId: number | string, quantity: number) => void;
+  clearCart: () => void;
+  getTotalPrice: () => number;
+  getTotalItems: () => number;
+}
+
+export interface SidebarState {
+  isOpen: boolean;
+  toggle: () => void;
+  setOpen: (open: boolean) => void;
+}
+
+export interface StoreSettings {
+  phoneNumber: string;
+  whatsappNumber: string;
+  storeName: string;
+  storeAddress: string;
+}
+
+export interface StoreSettingsState extends StoreSettings {
+  setSettings: (settings: Partial<StoreSettings>) => void;
+}
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: "success" | "error" | "info" | "warning";
+}
+
+export interface ToastState {
+  toasts: Toast[];
+  addToast: (message: string, type: Toast["type"]) => void;
+  removeToast: (id: string) => void;
+}

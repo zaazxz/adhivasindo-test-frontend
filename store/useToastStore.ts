@@ -1,18 +1,5 @@
 import { create } from 'zustand';
-
-export type ToastType = 'success' | 'error' | 'info';
-
-export interface Toast {
-  id: string;
-  message: string;
-  type: ToastType;
-}
-
-interface ToastState {
-  toasts: Toast[];
-  addToast: (message: string, type: ToastType) => void;
-  removeToast: (id: string) => void;
-}
+import { Toast, ToastState } from '@/types';
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],

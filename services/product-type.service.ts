@@ -2,7 +2,8 @@ import api from "@/lib/axios";
 
 export const productTypeService = {
   getAll: async (params?: any) => {
-    const response = await api.get("/product-types", { params });
+    const defaultParams = { per_page: 1000 };
+    const response = await api.get("/product-types", { params: { ...defaultParams, ...params } });
     return response.data;
   },
 

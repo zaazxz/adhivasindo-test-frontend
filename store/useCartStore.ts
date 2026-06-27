@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CartItem, Product } from '@/types';
+import { CartItem, Product, CartState } from '@/types';
 import Cookies from 'js-cookie';
 
 // NOTE: Cart is stored in cookies for dummy/demo purposes only.
@@ -24,19 +24,6 @@ const saveCartToCookies = (items: CartItem[]) => {
     // Ignore storage errors
   }
 };
-
-interface CartState {
-  isOpen: boolean;
-  items: CartItem[];
-  toggleCart: () => void;
-  setCartOpen: (open: boolean) => void;
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: number | string) => void;
-  updateQuantity: (productId: number | string, quantity: number) => void;
-  clearCart: () => void;
-  getTotalPrice: () => number;
-  getTotalItems: () => number;
-}
 
 export const useCartStore = create<CartState>((set, get) => ({
   isOpen: false,

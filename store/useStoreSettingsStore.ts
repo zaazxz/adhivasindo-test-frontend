@@ -1,16 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface StoreSettings {
-  phoneNumber: string;
-  whatsappNumber: string;
-  storeName: string;
-  storeAddress: string;
-}
-
-interface StoreSettingsState extends StoreSettings {
-  setSettings: (settings: Partial<StoreSettings>) => void;
-}
+import { StoreSettingsState } from "@/types";
 
 export const useStoreSettingsStore = create<StoreSettingsState>()(
   persist(
