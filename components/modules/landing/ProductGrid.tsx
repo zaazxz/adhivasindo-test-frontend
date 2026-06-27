@@ -147,10 +147,15 @@ export default function ProductGrid({ products, categories = [], selectedCategor
                       )}
                     </div>
                   )}
-                  {/* Out of Stock Badge */}
+                  {/* Status Badges */}
                   {!isAdded && outOfStock && (
                     <div className="absolute top-2 right-2 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                       Out of Stock
+                    </div>
+                  )}
+                  {!isAdded && !outOfStock && prod.status === 'draft' && (
+                    <div className="absolute top-2 right-2 bg-gray-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                      Draft
                     </div>
                   )}
                 </div>
