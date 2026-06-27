@@ -92,7 +92,13 @@ export default function Header() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchQuery(val);
+              if (!val.trim()) {
+                router.push("/");
+              }
+            }}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
             placeholder="Search for products..."
@@ -263,7 +269,13 @@ export default function Header() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                if (!val.trim()) {
+                  router.push("/");
+                }
+              }}
               placeholder="Search products..."
               className="flex-1 bg-transparent text-xs outline-none placeholder-gray-400 font-medium"
             />
