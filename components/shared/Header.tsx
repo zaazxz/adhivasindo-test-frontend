@@ -182,6 +182,9 @@ export default function Header() {
                           🎛️ Dashboard Admin
                         </Link>
                       )}
+                      <Link href="/profile" onClick={() => setUserDropdownOpen(false)} className="block w-full text-left px-4 py-2.5 text-[11px] font-medium text-gray-600 hover:bg-[#fef9e7] hover:text-[#f59e0b] transition-colors">
+                        👤 My Profile
+                      </Link>
                       <Link href="/orders" onClick={() => setUserDropdownOpen(false)} className="block w-full text-left px-4 py-2.5 text-[11px] font-medium text-gray-600 hover:bg-[#fef9e7] hover:text-[#f59e0b] transition-colors">
                         📦 Order History
                       </Link>

@@ -25,4 +25,14 @@ export const authService = {
     const response = await api.post("/auth/logout");
     return response.data;
   },
+
+  updateProfile: async (data: any) => {
+    const response = await api.patch("/auth/profile", data);
+    return response.data;
+  },
+
+  changePassword: async (data: any) => {
+    const response = await api.post("/auth/change-password", data);
+    return response.data;
+  },
 };

@@ -152,3 +152,14 @@ export interface NavGroup {
   sectionSub?: string;
   items: NavItem[];
 }
+
+export interface UpdateProfilePayload {
+  name: string;
+  email: string;
+}
+
+export interface ChangePasswordPayload {
+  current_password?: string;
+  password?: string;
+  password_confirmation?: string;
+}

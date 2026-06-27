@@ -56,10 +56,12 @@ Follow these instructions to get the project up and running on your local machin
 
 ## 📝 Features & Usage Tutorial
 
-### Storefront (Landing Page)
+### Storefront & Customer Features
 - **Browsing Products:** View all available products directly on the landing page. Use the category filters at the top or the search bar to find specific items.
 - **Cart System:** Click "Add to Cart" on any product. A floating shopping cart will store your items persistently using Zustand.
 - **Checkout:** Once you have items in your cart, click the Cart icon to review and click "Checkout" to place an order (requires login).
+- **Customer Profile:** Customers can manage their personal information (Name, Email) via the "My Profile" page.
+- **Security & Settings:** Customers can securely change their password directly from the Account Settings page.
 
 ### Admin Dashboard (`/dashboard`)
 To access the dashboard, log in with an administrator account.
